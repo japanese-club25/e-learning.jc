@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TokenService } from "./service/auth/services/token.service";
+
+// Note: Token validation against database is done in API routes and server components
+// Middleware only checks for token presence (Edge runtime doesn't support Prisma)
 
 export async function middleware(request: NextRequest) {
   // Get the pathname
@@ -29,25 +31,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // If it's a protected route and there's a token, verify it from database
-  if (isProtectedRoute && token) {
-    const validatedToken = await TokenService.validateToken(token);
-    
-    if (!validatedToken) {
-      // Token is invalid or revoked, clear cookie and redirect to login
-      const response = NextResponse.redirect(new URL('/login', request.url));
-      response.cookies.delete('auth_token');
-      return response;
-    }
-  }
-
-  // If user is logged in and trying to access auth routes, redirect to dashboard
+  // If user has a token and trying to access auth routes, redirect to dashboard
+  // Full token validation happens on the dashboard page/API
   if (isAuthRoute && token) {
-    const validatedToken = await TokenService.validateToken(token);
-    
-    if (validatedToken) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();

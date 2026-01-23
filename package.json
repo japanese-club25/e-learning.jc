@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@fingerprintjs/fingerprintjs-pro-react": "^2.7.1",
-    "@prisma/client": "^7.2.0",
+    "@prisma/client": "^6.19.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/js-cookie": "^3.0.6",
     "@types/jsonwebtoken": "^9.0.10",
@@ -41,7 +41,7 @@
     "@types/supertest": "^6.0.3",
     "jest": "^30.0.5",
     "jest-environment-node": "^30.0.5",
-    "prisma": "^7.2.0",
+    "prisma": "^6.19.2",
     "supertest": "^7.1.4",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.1",
