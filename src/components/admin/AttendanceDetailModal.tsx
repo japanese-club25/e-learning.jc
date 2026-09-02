@@ -16,6 +16,7 @@ import {
   Filter,
   ArrowUpDown
 } from 'lucide-react';
+import SyncButton from './SyncButton';
 
 interface Attendance {
   id: string;
@@ -34,6 +35,11 @@ interface Meeting {
   starts_at: string | null;
   ends_at: string | null;
   is_active: boolean;
+  sync_status?: 'PENDING' | 'SYNCING' | 'SYNCED' | 'FAILED';
+  last_synced_at?: string | null;
+  google_sheet_id?: string | null;
+  google_sheet_name?: string | null;
+  sync_error?: string | null;
 }
 
 interface AttendanceDetailModalProps {
@@ -59,7 +65,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
   const fetchData = async () => {
     try {
       const [meetingRes, attendanceRes] = await Promise.all([
-        fetch(`/api/attendance/meeting/${meetingId}`),
+        fetch(`/api/admin/meeting/${meetingId}`),
         fetch(`/api/attendance/list/${meetingId}`)
       ]);
 
@@ -461,18 +467,35 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
         </div>
 
         {/* Footer */}
-        <div className="bg-gradient-to-r from-slate-50 to-white px-6 py-4 flex items-center justify-between gap-3 border-t-2 border-slate-200 sticky bottom-0">
+        <div className="bg-gradient-to-r from-slate-50 to-white px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t-2 border-slate-200 sticky bottom-0">
           <div className="flex items-center gap-2 text-sm text-slate-600">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span>Meeting ID: <strong className="font-mono text-slate-900">{meetingId}</strong></span>
           </div>
-          
-          <button 
-            onClick={onClose} 
-            className="px-6 py-2.5 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-slate-700 hover:to-slate-800 font-semibold text-sm transition-all duration-300 transform hover:scale-105"
-          >
-            Close
-          </button>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+            {/* Google Sheets Sync */}
+            {meeting && (
+              <SyncButton
+                meetingId={meetingId}
+                initialSyncInfo={{
+                  syncStatus: meeting.sync_status ?? 'PENDING',
+                  lastSyncedAt: meeting.last_synced_at ?? null,
+                  googleSheetId: meeting.google_sheet_id ?? null,
+                  googleSheetName: meeting.google_sheet_name ?? null,
+                  syncError: meeting.sync_error ?? null,
+                  attendanceCount: attendances.length,
+                }}
+              />
+            )}
+
+            <button 
+              onClick={onClose} 
+              className="px-6 py-2.5 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-xl shadow-lg hover:shadow-xl hover:from-slate-700 hover:to-slate-800 font-semibold text-sm transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
