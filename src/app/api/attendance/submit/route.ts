@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
 import { cookies } from "next/headers";
 import { hashFingerprint, isValidFingerprint } from "@/utils/fingerprintHasher";
+import { calculateDistance, isValidCoordinate, DEFAULT_RADIUS_METERS } from "@/utils/geofence";
 
 // Rate limiting storage (in-memory, untuk production gunakan Redis)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -37,7 +38,7 @@ setInterval(() => {
 
 export async function POST(request: NextRequest) {
   try {
-    const { meeting_id, name, class: className, deviceId } = await request.json();
+    const { meeting_id, name, class: className, deviceId, latitude, longitude } = await request.json();
 
     // ===== HASH FINGERPRINT =====
     const fingerprintHash = deviceId ? hashFingerprint(deviceId) : null;
@@ -149,6 +150,58 @@ export async function POST(request: NextRequest) {
         { status: 403 } // Forbidden
       );
     }
+
+    // ===== GPS GEOFENCING =====
+    // Radius SELALU dari database/konstanta server, tidak pernah dari client.
+    const geofenceEnabled = meeting.latitude !== null && meeting.longitude !== null;
+    const radius = meeting.radius ?? DEFAULT_RADIUS_METERS;
+    let distance: number | null = null;
+
+    if (geofenceEnabled) {
+      if (latitude === undefined || longitude === undefined) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Lokasi tidak dapat diperoleh. Pastikan GPS aktif dan izinkan akses lokasi.",
+            type: "LOCATION_REQUIRED"
+          },
+          { status: 400 }
+        );
+      }
+
+      if (!isValidCoordinate(latitude, longitude)) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Koordinat lokasi tidak valid.",
+            type: "INVALID_COORDINATES"
+          },
+          { status: 400 }
+        );
+      }
+
+      distance = calculateDistance(
+        latitude,
+        longitude,
+        meeting.latitude as number,
+        meeting.longitude as number
+      );
+
+      // Satu-satunya aturan geofence. Tanpa toleransi, tanpa accuracy, tanpa pembulatan.
+      if (distance > radius) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Anda berada di luar radius absensi.",
+            type: "OUT_OF_RADIUS",
+            distance: Math.round(distance * 100) / 100,
+            radius
+          },
+          { status: 403 }
+        );
+      }
+    }
+    // Meeting tanpa koordinat: geofence dilewati (existing meetings tetap jalan).
 
     // Cari atau buat student
     let student = await prisma.student.findFirst({
@@ -283,6 +336,9 @@ export async function POST(request: NextRequest) {
         scanned_admin_id: firstAdmin.id,
         device_id: deviceId, // Simpan device ID (raw FingerprintJS ID)
         fingerprint_hash: fingerprintHash, // Simpan hashed fingerprint
+        latitude: isValidCoordinate(latitude, longitude) ? latitude : null,
+        longitude: isValidCoordinate(latitude, longitude) ? longitude : null,
+        distance,
         date: new Date(),
         recorded_at: new Date()
       } as any
@@ -310,7 +366,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Absensi berhasil dicatat",
+      message: "Absensi berhasil",
+      distance: distance === null ? null : Math.round(distance * 100) / 100,
       attendance: {
         id: attendance.id,
         student_name: student.name,

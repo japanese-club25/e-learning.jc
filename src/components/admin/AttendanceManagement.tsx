@@ -4,6 +4,7 @@ import { QrCode, PlusCircle, Clock, Copy, Search, Calendar, Users, TrendingUp, X
 import MeetingStatusToggle from './MeetingStatusToggle';
 import AttendanceDetailModal from './AttendanceDetailModal';
 import PermissionFormModal from './PermissionFormModal';
+import LocationPicker from './LocationPicker';
 
 type Meeting = {
   id: string;
@@ -12,6 +13,8 @@ type Meeting = {
   starts_at?: string;
   ends_at?: string;
   qr_payload?: string;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 export function AttendanceManagement() {
@@ -31,6 +34,7 @@ export function AttendanceManagement() {
   const [selectedMeetingForToggle, setSelectedMeetingForToggle] = useState<string | null>(null);
   const [selectedMeetingForDetail, setSelectedMeetingForDetail] = useState<string | null>(null);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [meetingCoords, setMeetingCoords] = useState<{ latitude: number; longitude: number } | null>(null);
 
   async function fetchMeetings() {
     try {
@@ -59,7 +63,10 @@ export function AttendanceManagement() {
       setLoading(true);
       setError(null);
       
-      const payload: any = { title: title.trim() };
+      const payload: any = { 
+        title: title.trim(),
+        ...(meetingCoords ?? {})
+      };
       if (startsAt) payload.starts_at = new Date(startsAt).toISOString();
       if (endsAt) payload.ends_at = new Date(endsAt).toISOString();
       
@@ -83,6 +90,7 @@ export function AttendanceManagement() {
         setTitle('');
         setStartsAt('');
         setEndsAt('');
+        setMeetingCoords(null);
         setSuccess('Meeting berhasil dibuat!');
         setTimeout(() => setSuccess(null), 3000);
         await fetchMeetings();
@@ -353,11 +361,16 @@ export function AttendanceManagement() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setTitle(''); setStartsAt(''); setEndsAt(''); setError(null); }}
+                  onClick={() => { setTitle(''); setStartsAt(''); setEndsAt(''); setError(null); setMeetingCoords(null); }}
                   className="px-6 py-3.5 rounded-xl border-2 border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
                 >
                   Reset
                 </button>
+              </div>
+
+              {/* Lokasi absensi (geofence 150 m) */}
+              <div className="rounded-xl border-2 border-slate-200 bg-slate-50 p-4 hover:border-slate-300 transition-colors">
+                <LocationPicker value={meetingCoords} onChange={setMeetingCoords} />
               </div>
             </form>
           </div>
@@ -421,6 +434,15 @@ export function AttendanceManagement() {
                                 </p>
                               </div>
                             )}
+                            <div className="mt-1">
+                              {m.latitude != null && m.longitude != null ? (
+                                <span className="text-xs text-emerald-700 font-medium">
+                                  📍 Geofence aktif ({m.latitude.toFixed(6)}, {m.longitude.toFixed(6)})
+                                </span>
+                              ) : (
+                                <span className="text-xs text-slate-500">📍 Tanpa lokasi — geofence tidak aktif</span>
+                              )}
+                            </div>
                             <div className="mt-2 p-2 bg-slate-100 rounded-lg border border-slate-200">
                               <p className="text-xs text-slate-600 flex items-center gap-2">
                                 <span className="font-semibold">QR URL:</span>

@@ -28,6 +28,49 @@ export default function AttendanceForm({ meetingId }: AttendanceFormProps) {
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
   const [isPermissionMode, setIsPermissionMode] = useState(false);
 
+  // ===== GPS LOCATION =====
+  const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  const requestLocation = () => {
+    if (!('geolocation' in navigator)) {
+      setLocationStatus('error');
+      setLocationError('Perangkat tidak mendukung GPS. Absensi tidak dapat dilakukan dari perangkat ini.');
+      return;
+    }
+
+    setLocationStatus('loading');
+    setLocationError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        });
+        setLocationStatus('success');
+      },
+      (err) => {
+        setLocationStatus('error');
+        setLocationError(
+          err.code === err.PERMISSION_DENIED
+            ? 'Permission lokasi ditolak. Aktifkan akses lokasi pada browser.'
+            : 'Lokasi tidak dapat diperoleh. Pastikan GPS aktif dan izinkan akses lokasi.'
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 15000
+      }
+    );
+  };
+
+  useEffect(() => {
+    requestLocation();
+  }, []);
+
   // ===== DEVICE ID & SUBMISSION CHECK =====
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -129,6 +172,14 @@ export default function AttendanceForm({ meetingId }: AttendanceFormProps) {
       return;
     }
 
+    // ===== VALIDASI GPS (hanya untuk mode hadir) =====
+    if (!isPermissionMode && !coords) {
+      setError(
+        locationError || 'Lokasi tidak dapat diperoleh. Pastikan GPS aktif dan izinkan akses lokasi.'
+      );
+      return;
+    }
+
     // ===== VALIDASI CLIENT-SIDE: Cek localStorage (hanya untuk mode hadir) =====
     if (!isPermissionMode && alreadySubmitted) {
       setError('Anda sudah mengisi absensi hari ini. Tidak dapat submit ulang.');
@@ -173,6 +224,8 @@ export default function AttendanceForm({ meetingId }: AttendanceFormProps) {
             name: formData.name.trim(),
             class: formData.class.trim(),
             deviceId: deviceId,
+            latitude: coords!.latitude,
+            longitude: coords!.longitude,
           };
 
       const response = await fetch(endpoint, {
@@ -211,7 +264,13 @@ export default function AttendanceForm({ meetingId }: AttendanceFormProps) {
         }, 2000);
       } else {
         // Tampilkan error yang spesifik dari server
-        setError(data.message || 'Gagal mencatat ' + (isPermissionMode ? 'izin' : 'absensi'));
+        if (data.type === 'OUT_OF_RADIUS') {
+          setError(
+            `Anda berada ${Math.round(data.distance)} meter dari lokasi absensi. Batas maksimal adalah ${data.radius} meter.`
+          );
+        } else {
+          setError(data.message || 'Gagal mencatat ' + (isPermissionMode ? 'izin' : 'absensi'));
+        }
         
         // Jika error adalah duplicate, tandai sudah submit (hanya untuk mode hadir)
         if (!isPermissionMode && (data.type === 'USER_DUPLICATE' || data.type === 'DEVICE_DUPLICATE' || data.type === 'COOKIE_DUPLICATE' || data.type === 'FINGERPRINT_DUPLICATE')) {
@@ -309,6 +368,36 @@ export default function AttendanceForm({ meetingId }: AttendanceFormProps) {
         <div className="bg-gray-50 border border-gray-200 text-gray-700 px-4 py-3 rounded-lg text-center">
           <p className="text-sm">🔍 Mendeteksi device fingerprint...</p>
           <p className="text-xs text-gray-500 mt-1">Mohon tunggu sebentar...</p>
+        </div>
+      )}
+
+      {/* ===== GPS STATUS (mode hadir) ===== */}
+      {!isPermissionMode && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`px-4 py-3 rounded-lg border text-sm ${
+            locationStatus === 'success'
+              ? 'bg-green-50 border-green-200 text-green-700'
+              : locationStatus === 'error'
+              ? 'bg-red-50 border-red-200 text-red-700'
+              : 'bg-gray-50 border-gray-200 text-gray-700'
+          }`}
+        >
+          {locationStatus === 'loading' && <p>📍 Mengambil lokasi...</p>}
+          {locationStatus === 'success' && <p>📍 Lokasi berhasil diperoleh.</p>}
+          {locationStatus === 'error' && (
+            <div>
+              <p>📍 {locationError}</p>
+              <button
+                type="button"
+                onClick={requestLocation}
+                className="mt-2 px-4 py-1.5 bg-red-600 text-white rounded-md text-xs font-semibold hover:bg-red-700 transition-colors"
+              >
+                Coba Ambil Lokasi Lagi
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -431,7 +520,7 @@ export default function AttendanceForm({ meetingId }: AttendanceFormProps) {
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={loading || (!isPermissionMode && alreadySubmitted) || (!isPermissionMode && isFingerprintLoading)}
+        disabled={loading || (!isPermissionMode && alreadySubmitted) || (!isPermissionMode && isFingerprintLoading) || (!isPermissionMode && !coords)}
         className={`w-full text-white py-3 px-6 rounded-lg font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-[0.98] ${
           isPermissionMode
             ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 focus:ring-amber-500 shadow-lg shadow-amber-500/30'
@@ -448,6 +537,16 @@ export default function AttendanceForm({ meetingId }: AttendanceFormProps) {
           </span>
         ) : alreadySubmitted && !isPermissionMode ? (
           '✓ Sudah Mengisi Absensi Hari Ini'
+        ) : !isPermissionMode && locationStatus === 'loading' ? (
+          <span className="flex items-center justify-center">
+            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Mengambil Lokasi...
+          </span>
+        ) : !isPermissionMode && !coords ? (
+          '📍 Lokasi Diperlukan'
         ) : loading ? (
           <span className="flex items-center justify-center">
             <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

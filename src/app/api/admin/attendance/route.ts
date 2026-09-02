@@ -1,16 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
+import { isValidCoordinate } from "@/utils/geofence";
 
 // POST: create a new meeting (generates a unique meeting id and returns a qr payload)
 export async function POST(request: NextRequest) {
   try {
-    const { title, starts_at, ends_at } = await request.json();
+    const { title, starts_at, ends_at, latitude, longitude } = await request.json();
+
+    // Koordinat lokasi absensi bersifat opsional. Jika dikirim, keduanya wajib valid.
+    const hasCoords = latitude !== undefined && latitude !== null && longitude !== undefined && longitude !== null;
+    if (hasCoords && !isValidCoordinate(latitude, longitude)) {
+      return NextResponse.json(
+        { success: false, message: "Koordinat lokasi absensi tidak valid" },
+        { status: 400 }
+      );
+    }
 
     const meeting = await prisma.meeting.create({
       data: {
         title: title || "Pertemuan baru",
         starts_at: starts_at ? new Date(starts_at) : new Date(),
         ends_at: ends_at ? new Date(ends_at) : null,
+        latitude: hasCoords ? latitude : null,
+        longitude: hasCoords ? longitude : null,
       }
     });
 

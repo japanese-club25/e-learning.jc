@@ -4,12 +4,15 @@ import { QrCode, PlusCircle, Clock, Copy, Search, Users, UserCheck, Download, Tr
 import { QuickActions } from '@/components/admin/dashboard/QuickActions';
 import { RecentActivity } from '@/components/admin/dashboard/RecentActivity';
 import { useDebounce } from '@/hooks/useDebounce';
+import LocationPicker from '@/components/admin/LocationPicker';
 
 type Meeting = {
   id: string;
   title: string;
   created_at: string;
   qr_payload?: string;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 type Student = {
@@ -49,6 +52,7 @@ export default function AttendanceDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<'newest' | 'oldest'>('newest');
+  const [meetingCoords, setMeetingCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   
   // Attendance list state
   const [attendances, setAttendances] = useState<Attendance[]>([]);
@@ -252,13 +256,17 @@ export default function AttendanceDashboard() {
       const res = await fetch('/api/admin/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title.trim() }),
+        body: JSON.stringify({
+          title: title.trim(),
+          ...(meetingCoords ?? {}),
+        }),
       });
       const data = await res.json();
       if (data.success) {
         setQrPayload(data.qr_payload || null);
         setShowQrModal(true);
         setTitle('');
+        setMeetingCoords(null);
         await fetchMeetings();
       } else {
         setError(data?.message || 'Failed to create meeting');
@@ -361,12 +369,17 @@ export default function AttendanceDashboard() {
               </button>
               <button
                 type="button"
-                onClick={() => { setTitle(''); setError(null); }}
+                onClick={() => { setTitle(''); setError(null); setMeetingCoords(null); }}
                 className="px-3 py-2 rounded-md border text-sm text-slate-700"
               >
                 Reset
               </button>
               {error && <p className="text-sm text-red-600 ml-3">{error}</p>}
+            </div>
+
+            {/* Lokasi absensi (geofence 150 m). Kosongkan untuk menonaktifkan geofence. */}
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <LocationPicker value={meetingCoords} onChange={setMeetingCoords} />
             </div>
           </form>
 
@@ -396,6 +409,15 @@ export default function AttendanceDashboard() {
                   <div className="flex-1">
                     <p className="font-medium text-slate-900">{m.title}</p>
                     <p className="text-xs text-slate-500">{new Date(m.created_at).toLocaleString('ja-JP')}</p>
+                    <p className="mt-1 text-xs">
+                      {m.latitude != null && m.longitude != null ? (
+                        <span className="text-emerald-700">
+                          📍 Geofence aktif — <span className="font-mono">{m.latitude.toFixed(6)}, {m.longitude.toFixed(6)}</span>
+                        </span>
+                      ) : (
+                        <span className="text-slate-500">📍 Tanpa lokasi — geofence tidak aktif</span>
+                      )}
+                    </p>
                     {m.qr_payload && (
                       <p className="mt-2 text-xs text-slate-500 truncate max-w-md">Payload: <span className="font-mono text-xs text-slate-700">{m.qr_payload}</span></p>
                     )}
