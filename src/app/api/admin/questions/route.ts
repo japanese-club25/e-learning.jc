@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
 import { Category, Option } from "@prisma/client";
+import { requireAdmin } from "@/lib/auth-guard";
+import {
+  deleteQuestionImage,
+  uploadQuestionImage,
+  validateImageFile,
+} from "@/lib/cloudinary";
 
 // GET all questions
 export async function GET(request: NextRequest) {
   try {
+    const denied = await requireAdmin();
+    if (denied) return denied;
+
     const { searchParams } = new URL(request.url);
     const exam_id = searchParams.get('exam_id');
     const category = searchParams.get('category') as Category | null;
@@ -98,12 +107,68 @@ export async function GET(request: NextRequest) {
 
 // POST create new question
 export async function POST(request: NextRequest) {
+  let uploadedPublicId: string | null = null;
+
   try {
-    const body = await request.json();
-    const { exam_ids, question_text, option_a, option_b, option_c, option_d, correct_option, explanation } = body;
+    // Auth first: never touch Cloudinary on behalf of an anonymous caller.
+    const denied = await requireAdmin();
+    if (denied) return denied;
+
+    const contentType = request.headers.get("content-type") || "";
+    const isMultipart = contentType.includes("multipart/form-data");
+
+    let exam_ids: string[] = [];
+    let question_text: string | undefined;
+    let option_a: string | undefined;
+    let option_b: string | undefined;
+    let option_c: string | undefined;
+    let option_d: string | undefined;
+    let correct_option: Option | undefined;
+    let explanation: string | undefined;
+    let image_url: string | null = null;
+    let image_public_id: string | null = null;
+
+    if (isMultipart) {
+      const form = await request.formData();
+
+      exam_ids = form.getAll("exam_ids").map(String).filter(Boolean);
+      question_text = form.get("question_text")?.toString();
+      option_a = form.get("option_a")?.toString();
+      option_b = form.get("option_b")?.toString();
+      option_c = form.get("option_c")?.toString();
+      option_d = form.get("option_d")?.toString();
+      correct_option = form.get("correct_option")?.toString() as Option | undefined;
+      explanation = form.get("explanation")?.toString();
+
+      const image = form.get("image");
+      if (image instanceof File && image.size > 0) {
+        const invalid = validateImageFile(image);
+        if (invalid) {
+          return NextResponse.json(
+            { success: false, message: invalid },
+            { status: 400 }
+          );
+        }
+        const uploaded = await uploadQuestionImage(image);
+        image_url = uploaded.url;
+        image_public_id = uploaded.publicId;
+        uploadedPublicId = uploaded.publicId;
+      }
+    } else {
+      const body = await request.json();
+      exam_ids = Array.isArray(body.exam_ids) ? body.exam_ids : [];
+      question_text = body.question_text;
+      option_a = body.option_a;
+      option_b = body.option_b;
+      option_c = body.option_c;
+      option_d = body.option_d;
+      correct_option = body.correct_option;
+      explanation = body.explanation;
+    }
 
     // Validate required fields
     if (!question_text || !option_a || !option_b || !option_c || !option_d || !correct_option) {
+      await deleteQuestionImage(uploadedPublicId);
       return NextResponse.json(
         { success: false, message: "All fields are required" },
         { status: 400 }
@@ -120,6 +185,8 @@ export async function POST(request: NextRequest) {
         option_d: option_d.trim(),
         correct_option,
         explanation: explanation?.trim() || null,
+        image_url,
+        image_public_id,
         exam_questions: exam_ids && exam_ids.length > 0 ? {
           create: exam_ids.map((exam_id: string) => ({
             exam_id
@@ -156,6 +223,8 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
+    // Orphan cleanup: the asset is only referenced once the row exists.
+    await deleteQuestionImage(uploadedPublicId);
     console.error("Create question error:", error);
     return NextResponse.json(
       { success: false, message: "Failed to create question" },

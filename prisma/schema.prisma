@@ -9,18 +9,20 @@ datasource db {
 }
 
 model Question {
-  id             String         @id @default(uuid())
-  question_text  String
-  option_a       String
-  option_b       String
-  option_c       String
-  option_d       String
-  correct_option Option
-  created_at     DateTime       @default(now())
-  updated_at     DateTime       @updatedAt
-  explanation    String?
-  answers        Answer[]
-  exam_questions ExamQuestion[]
+  id              String         @id @default(uuid())
+  question_text   String
+  option_a        String
+  option_b        String
+  option_c        String
+  option_d        String
+  correct_option  Option
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+  explanation     String?
+  image_url       String?
+  image_public_id String?
+  answers         Answer[]
+  exam_questions  ExamQuestion[]
 
   @@map("questions")
 }

@@ -137,6 +137,7 @@ export async function GET(request: NextRequest) {
         id: question.id,
         questionNumber: index + 1,
         question_text: question.question_text,
+        image_url: question.image_url,
         options: [
           { id: 'A', text: question.option_a },
           { id: 'B', text: question.option_b },

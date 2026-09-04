@@ -5,6 +5,7 @@ interface ReviewQuestion {
   id: string;
   questionNumber: number;
   question_text: string;
+  image_url?: string | null;
   options: Array<{
     id: string;
     text: string;
@@ -284,6 +285,14 @@ export default function ExamReview({
               }`}>
                 {question.question_text}
               </div>
+
+              {question.image_url && (
+                <img
+                  src={question.image_url}
+                  alt={`Image for question ${question.questionNumber}`}
+                  className="mb-6 max-h-80 w-auto rounded-lg border border-gray-200 object-contain"
+                />
+              )}
 
               {/* Options */}
               <div className="space-y-3">

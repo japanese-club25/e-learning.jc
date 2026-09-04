@@ -38,6 +38,7 @@ export async function GET(
         option_b: true,
         option_c: true,
         option_d: true,
+        image_url: true,
         // Don't include correct_option for security
         exam_questions: {
           include: {
@@ -76,6 +77,7 @@ export async function GET(
       id: question.id,
       questionNumber: index + 1,
       question_text: question.question_text,
+      image_url: question.image_url,
       options: [
         { id: "A", text: question.option_a },
         { id: "B", text: question.option_b },

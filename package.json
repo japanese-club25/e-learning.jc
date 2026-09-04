@@ -21,6 +21,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@zxing/library": "^0.21.3",
     "bcryptjs": "^3.0.2",
+    "cloudinary": "2.7.0",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.539.0",

@@ -39,7 +39,10 @@ export function QuestionManagement() {
     option_c: '',
     option_d: '',
     correct_option: 'A',
-    explanation: ''
+    explanation: '',
+    image: null,
+    image_url: null,
+    remove_image: false
   });
 
   useEffect(() => {
@@ -65,6 +68,13 @@ export function QuestionManagement() {
       }
       
       const response = await fetch(`/api/admin/questions?${params}`);
+
+      // Session expired while the tab was open: an empty list would be a lie.
+      if (response.status === 401) {
+        window.location.href = '/login';
+        return;
+      }
+
       if (response.ok) {
         const data = await response.json();
         setQuestions(data.questions || []);
@@ -104,13 +114,23 @@ export function QuestionManagement() {
         : '/api/admin/questions';
       
       const method = editingQuestion ? 'PUT' : 'POST';
-      
+
+      // multipart so the image rides along with the fields in one request
+      const payload = new FormData();
+      formData.exam_ids.forEach(id => payload.append('exam_ids', id));
+      payload.append('question_text', formData.question_text);
+      payload.append('option_a', formData.option_a);
+      payload.append('option_b', formData.option_b);
+      payload.append('option_c', formData.option_c);
+      payload.append('option_d', formData.option_d);
+      payload.append('correct_option', formData.correct_option);
+      payload.append('explanation', formData.explanation || '');
+      if (formData.image) payload.append('image', formData.image);
+      if (formData.remove_image) payload.append('remove_image', 'true');
+
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        body: payload,
       });
 
       if (response.ok) {
@@ -136,7 +156,10 @@ export function QuestionManagement() {
       option_c: question.option_c,
       option_d: question.option_d,
       correct_option: question.correct_option,
-      explanation: question.explanation || ''
+      explanation: question.explanation || '',
+      image: null,
+      image_url: question.image_url || null,
+      remove_image: false
     });
     setShowForm(true);
   };
@@ -169,7 +192,10 @@ export function QuestionManagement() {
       option_c: '',
       option_d: '',
       correct_option: 'A',
-      explanation: ''
+      explanation: '',
+      image: null,
+      image_url: null,
+      remove_image: false
     });
     setEditingQuestion(null);
     setShowForm(false);

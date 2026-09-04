@@ -5,6 +5,7 @@ interface Question {
   id: string;
   questionNumber: number;
   question_text: string;
+  image_url?: string | null;
   options: Array<{
     id: string;
     text: string;
@@ -68,6 +69,17 @@ export default function QuestionContent({
       }`}>
         {question.question_text}
       </div>
+
+      {/* Question Image */}
+      {question.image_url && (
+        <img
+          src={question.image_url}
+          alt={`Image for question ${questionNumber}`}
+          className={`mb-6 sm:mb-8 max-h-80 w-auto rounded-xl border object-contain ${
+            isDark ? 'border-purple-500/20' : 'border-blue-200/50'
+          }`}
+        />
+      )}
 
       {/* Options */}
       <div className="space-y-3 sm:space-y-4">

@@ -2,6 +2,7 @@ export interface Question {
   id: string;
   questionNumber: number;
   question_text: string;
+  image_url?: string | null;
   options: Array<{
     id: string;
     text: string;
