@@ -89,7 +89,7 @@ export default function ExamTestPage() {
         setTimeLeft(data.exam.duration * 60); // Convert minutes to seconds
         
         // Fetch questions
-        const response = await fetch(`/api/student/questions/${data.student.category}`);
+        const response = await fetch(`/api/student/questions/${data.student.category}?examCode=${data.student.exam_code}`);
         const questionsData = await response.json();
 
         if (questionsData.success) {

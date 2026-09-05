@@ -8,6 +8,8 @@ export async function GET(
 ) {
   try {
     const { category } = await params;
+    const url = new URL(request.url);
+    const examCode = url.searchParams.get("examCode");
 
     // Validasi category
     if (!Object.values(Category).includes(category as Category)) {
@@ -26,7 +28,8 @@ export async function GET(
         exam_questions: {
           some: {
             exam: {
-              category: category as Category
+              category: category as Category,
+              ...(examCode && { exam_code: examCode })
             }
           }
         }
@@ -52,7 +55,8 @@ export async function GET(
           },
           where: {
             exam: {
-              category: category as Category
+              category: category as Category,
+              ...(examCode && { exam_code: examCode })
             }
           }
         }
