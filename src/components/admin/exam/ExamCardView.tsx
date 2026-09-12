@@ -66,7 +66,7 @@ export function ExamCardView({
           {!searchTerm && (
             <button
               onClick={onCreateExam}
-              className="mt-4 text-indigo-600 hover:text-indigo-700 text-sm sm:text-base font-medium"
+              className="mt-4 text-orange-600 hover:text-orange-700 text-sm sm:text-base font-medium"
             >
               Create your first exam
             </button>
@@ -82,7 +82,7 @@ export function ExamCardView({
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
                     {exam.name}
                   </h3>
-                  <p className="text-sm font-medium text-indigo-600 mt-1">
+                  <p className="text-sm font-medium text-orange-600 mt-1">
                     {exam.exam_code}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
@@ -114,9 +114,9 @@ export function ExamCardView({
               )}
 
               {exam._count && (
-                <div className="flex items-center text-sm text-gray-600 mb-4 p-2 bg-blue-50 rounded-lg">
-                  <Users className="h-4 w-4 mr-2 text-blue-600 flex-shrink-0" />
-                  <span className="text-blue-700">
+                <div className="flex items-center text-sm text-gray-600 mb-4 p-2 bg-orange-50 rounded-lg">
+                  <Users className="h-4 w-4 mr-2 text-orange-600 flex-shrink-0" />
+                  <span className="text-orange-700">
                     {exam._count.scores} student{exam._count.scores !== 1 ? 's' : ''} participated
                   </span>
                 </div>
@@ -146,7 +146,7 @@ export function ExamCardView({
                     className={`flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 min-w-0 ${
                       exam.is_active
                         ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                        : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
                     }`}
                   >
                     {exam.is_active ? (

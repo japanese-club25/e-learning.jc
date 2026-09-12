@@ -5,12 +5,17 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 export interface AuthUser {
   id: string;
   email: string;
+  role?: "admin" | "student";
+  isFirstLogin?: boolean;
+  name?: string;
+  class?: string;
+  category?: "Gengo" | "Bunka";
 }
 
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  login: (email: string, password: string, type?: "admin" | "student") => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
   register: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<{ success: boolean; message: string }>;
@@ -45,9 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, type: "admin" | "student" = "admin") => {
     try {
-      const response = await fetch("/api/auth/login", {
+      const endpoint = type === "student" ? "/api/auth/student/login" : "/api/auth/login";
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +111,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const changePassword = async (currentPassword: string, newPassword: string) => {
     try {
-      const response = await fetch("/api/auth/change-password", {
+      const endpoint = user?.role === "student" ? "/api/auth/student/change-password" : "/api/auth/change-password";
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

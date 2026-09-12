@@ -60,7 +60,7 @@ export function JapaneseThemeShowcase() {
     <div className="space-y-6 p-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <JapaneseCard 
-          title={{ jp: "和のデザイン", en: "Japanese Design System" }}
+          title={{ jp: "Design System", en: "Design System" }}
           variant="primary"
         >
           <p className="text-slate-600 leading-relaxed mb-4">
@@ -69,10 +69,10 @@ export function JapaneseThemeShowcase() {
           </p>
           <div className="flex space-x-3">
             <button className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 font-medium">
-              主要 • Primary
+              Primary
             </button>
             <button className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 font-medium">
-              成功 • Success
+              Success
             </button>
           </div>
         </JapaneseCard>

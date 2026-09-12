@@ -267,11 +267,11 @@ export function QuestionManagement() {
 <>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div className="flex items-center space-x-4">
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-3 shadow-lg">
+          <div className="bg-orange-500 rounded-xl p-3 shadow-sm">
             <BookOpen className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">質問管理</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Question Management</h2>
             <p className="text-slate-600 text-sm sm:text-base font-medium">Question Management</p>
           </div>
         </div>
@@ -299,7 +299,7 @@ export function QuestionManagement() {
       {/* Questions Content */}
       {loading ? (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
         </div>
       ) : questions.length === 0 ? (
         <EmptyState

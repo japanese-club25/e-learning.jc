@@ -21,7 +21,7 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
         }`}
       >
         <Grid className="h-4 w-4 mr-2" />
-        カード • Cards
+        Cards
       </button>
       <button
         onClick={() => onViewModeChange('table')}
@@ -32,7 +32,7 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
         }`}
       >
         <List className="h-4 w-4 mr-2" />
-        テーブル • Table
+        Table
       </button>
     </div>
   );

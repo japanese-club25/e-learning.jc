@@ -8,31 +8,26 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Define protected routes
-  const protectedRoutes = ['/dashboard', '/api/admin'];
+  const adminRoutes = ['/dashboard', '/api/admin'];
+  const studentRoutes = ['/student'];
   const authRoutes = ['/login'];
 
-  // Check if the current path is protected
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route)
-  );
-
-  // Check if the current path is an auth route
-  const isAuthRoute = authRoutes.some(route => 
-    pathname.startsWith(route)
-  );
+  const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
+  const isStudentRoute = studentRoutes.some(route => pathname.startsWith(route));
+  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
 
   // Get the auth token from cookies
   const token = request.cookies.get('auth_token')?.value;
 
-  // If it's a protected route and no token, redirect to login
-  if (isProtectedRoute && !token) {
+  if (!token && (isAdminRoute || isStudentRoute)) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // If user has a token and trying to access auth routes, redirect to dashboard
-  // Full token validation happens on the dashboard page/API
+  // If user has a token and trying to access auth routes, 
+  // we redirect them. We don't know their role here (edge runtime), 
+  // so redirect to a generic endpoint or let them hit /dashboard where it checks role
   if (isAuthRoute && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
@@ -44,12 +39,13 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
+     * - api/auth (allow login APIs)
+     * - api/public
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!api/auth|api/public|_next/static|_next/image|favicon.ico|public).*)',
   ],
 };

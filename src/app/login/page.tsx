@@ -12,7 +12,7 @@ export default function JapaneseLMSLogin() {
   const [isDark, setIsDark] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [loginType, setLoginType] = useState('admin'); // 'student' or 'admin'
+  const [loginType, setLoginType] = useState<'admin' | 'student'>('admin');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -26,7 +26,11 @@ export default function JapaneseLMSLogin() {
     
     // Redirect if already logged in
     if (user && !authLoading) {
-      router.push('/dashboard');
+       if (user.role === 'admin') {
+         router.push('/dashboard');
+       } else {
+         router.push('/student/dashboard');
+       }
     }
   }, [user, authLoading, router]);
 
@@ -80,19 +84,10 @@ export default function JapaneseLMSLogin() {
     }
     
     try {
-      // For now, we only support admin login since student login isn't implemented
-      if (loginType === 'student') {
-        setError('Login siswa belum tersedia. Silakan gunakan login admin.');
-        setIsLoading(false);
-        return;
-      }
-
-      // Use email field as username for admin login
-      const result = await login(formData.email, formData.password);
+      const result = await login(formData.email, formData.password, loginType);
       
       if (result.success) {
-        // Redirect will happen automatically via useEffect when user state updates
-        router.push('/dashboard');
+        // user will be updated via AuthContext, useEffect handles redirect
       } else {
         setError(result.message || 'Login gagal. Silakan periksa email dan password Anda.');
       }
@@ -112,6 +107,7 @@ export default function JapaneseLMSLogin() {
       showPassword={showPassword}
       setShowPassword={setShowPassword}
       loginType={loginType}
+      setLoginType={setLoginType as any}
       isLoading={isLoading}
       formData={formData}
       handleInputChange={handleInputChange}

@@ -111,10 +111,10 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      HADIR: 'bg-emerald-100 text-emerald-700 border-emerald-300',
-      TERLAMBAT: 'bg-amber-100 text-amber-700 border-amber-300',
-      IZIN: 'bg-blue-100 text-blue-700 border-blue-300',
-      TIDAK_HADIR: 'bg-rose-100 text-rose-700 border-rose-300'
+      HADIR: 'bg-orange-100 text-orange-700 border-orange-300',
+      TERLAMBAT: 'bg-orange-50 text-orange-700 border-orange-200',
+      IZIN: 'bg-orange-50 text-orange-700 border-orange-200',
+      TIDAK_HADIR: 'bg-red-50 text-red-700 border-red-200'
     };
     return styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-700 border-gray-300';
   };
@@ -159,7 +159,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
         <div className="relative z-10 bg-white rounded-3xl shadow-2xl max-w-6xl w-full p-12 text-center">
-          <div className="inline-block w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+          <div className="inline-block w-16 h-16 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin mb-4"></div>
           <p className="text-slate-600 font-medium">Loading attendance data...</p>
         </div>
       </div>
@@ -174,7 +174,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
       
       <div className="relative z-10 bg-white rounded-3xl shadow-2xl max-w-7xl w-full max-h-[95vh] overflow-hidden border-2 border-slate-200 animate-in zoom-in duration-300">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6 sticky top-0 z-20">
+          <div className="bg-orange-600 p-6 sticky top-0 z-20">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4 flex-1 min-w-0">
               <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-sm shadow-lg flex-shrink-0">
@@ -186,7 +186,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
                 </h2>
                 <div className="flex flex-wrap items-center gap-3 text-sm">
                   {meeting?.starts_at && (
-                    <div className="flex items-center gap-1.5 text-indigo-100">
+                    <div className="flex items-center gap-1.5 text-orange-100">
                       <Calendar className="w-4 h-4" />
                       <span>{new Date(meeting.starts_at).toLocaleDateString('id-ID', {
                         day: 'numeric',
@@ -196,7 +196,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
                     </div>
                   )}
                   {meeting?.starts_at && (
-                    <div className="flex items-center gap-1.5 text-indigo-100">
+                    <div className="flex items-center gap-1.5 text-orange-100">
                       <Clock className="w-4 h-4" />
                       <span>{new Date(meeting.starts_at).toLocaleTimeString('id-ID', {
                         hour: '2-digit',
@@ -206,10 +206,10 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
                   )}
                   <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
                     meeting?.is_active 
-                      ? 'bg-emerald-500/20 text-emerald-100 border border-emerald-300/30' 
-                      : 'bg-rose-500/20 text-rose-100 border border-rose-300/30'
+                       ? 'bg-orange-500/20 text-orange-100 border border-orange-300/30' 
+                       : 'bg-red-500/20 text-red-100 border border-red-300/30'
                   }`}>
-                    <div className={`w-2 h-2 rounded-full ${meeting?.is_active ? 'bg-emerald-300' : 'bg-rose-300'}`} />
+                     <div className={`w-2 h-2 rounded-full ${meeting?.is_active ? 'bg-orange-300' : 'bg-red-300'}`} />
                     {meeting?.is_active ? 'Active' : 'Inactive'}
                   </div>
                 </div>
@@ -227,59 +227,59 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
         {/* Stats Cards */}
         <div className="p-6 bg-gradient-to-br from-slate-50 to-white border-b border-slate-200">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl p-4 shadow-lg border border-indigo-400/20 group hover:shadow-xl transition-all">
+              <div className="bg-orange-600 rounded-2xl p-4 shadow-sm border border-orange-500 group hover:shadow-md transition-all">
               <div className="flex items-center gap-3 mb-2">
                 <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
                   <Users className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-indigo-100 text-xs font-semibold uppercase tracking-wide">Total</span>
+                <span className="text-orange-100 text-xs font-semibold uppercase tracking-wide">Total</span>
               </div>
               <p className="text-white text-3xl font-bold">{stats.total}</p>
-              <p className="text-indigo-200 text-xs mt-1">students</p>
+                <p className="text-orange-200 text-xs mt-1">students</p>
             </div>
 
-            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 shadow-lg border border-emerald-400/20 group hover:shadow-xl transition-all">
+              <div className="bg-orange-600 rounded-2xl p-4 shadow-sm border border-orange-500 group hover:shadow-md transition-all">
               <div className="flex items-center gap-3 mb-2">
                 <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
                   <UserCheck className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-emerald-100 text-xs font-semibold uppercase tracking-wide">Hadir</span>
+                <span className="text-orange-100 text-xs font-semibold uppercase tracking-wide">Present</span>
               </div>
               <p className="text-white text-3xl font-bold">{stats.hadir}</p>
-              <p className="text-emerald-200 text-xs mt-1">{attendanceRate}% rate</p>
+                <p className="text-orange-200 text-xs mt-1">{attendanceRate}% rate</p>
             </div>
 
-            <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-4 shadow-lg border border-amber-400/20 group hover:shadow-xl transition-all">
+              <div className="bg-orange-600 rounded-2xl p-4 shadow-sm border border-orange-500 group hover:shadow-md transition-all">
               <div className="flex items-center gap-3 mb-2">
                 <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
                   <Clock className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-amber-100 text-xs font-semibold uppercase tracking-wide">Terlambat</span>
+                <span className="text-orange-100 text-xs font-semibold uppercase tracking-wide">Late</span>
               </div>
               <p className="text-white text-3xl font-bold">{stats.terlambat}</p>
-              <p className="text-amber-200 text-xs mt-1">late entries</p>
+                <p className="text-orange-200 text-xs mt-1">late entries</p>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 shadow-lg border border-blue-400/20 group hover:shadow-xl transition-all">
+              <div className="bg-orange-600 rounded-2xl p-4 shadow-sm border border-orange-500 group hover:shadow-md transition-all">
               <div className="flex items-center gap-3 mb-2">
                 <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
                   <FileText className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-blue-100 text-xs font-semibold uppercase tracking-wide">Izin</span>
+                <span className="text-orange-100 text-xs font-semibold uppercase tracking-wide">Excused</span>
               </div>
               <p className="text-white text-3xl font-bold">{stats.izin}</p>
-              <p className="text-blue-200 text-xs mt-1">excused</p>
+                <p className="text-orange-200 text-xs mt-1">excused</p>
             </div>
 
-            <div className="bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl p-4 shadow-lg border border-rose-400/20 group hover:shadow-xl transition-all">
+              <div className="bg-orange-600 rounded-2xl p-4 shadow-sm border border-orange-500 group hover:shadow-md transition-all">
               <div className="flex items-center gap-3 mb-2">
                 <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
                   <AlertCircle className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-rose-100 text-xs font-semibold uppercase tracking-wide">Tidak Hadir</span>
+                <span className="text-red-100 text-xs font-semibold uppercase tracking-wide">Absent</span>
               </div>
               <p className="text-white text-3xl font-bold">{stats.tidakHadir}</p>
-              <p className="text-rose-200 text-xs mt-1">absent</p>
+                <p className="text-red-200 text-xs mt-1">absent</p>
             </div>
           </div>
         </div>
@@ -295,7 +295,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
                 placeholder="Cari nama atau kelas..."
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 transition-all outline-none hover:border-slate-300"
+                 className="w-full pl-10 pr-4 py-3 bg-white border-2 border-orange-100 rounded-xl text-sm focus:ring-2 focus:ring-orange-200 focus:border-orange-300 transition-colors outline-none hover:border-orange-300"
               />
             </div>
 
@@ -305,7 +305,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full md:w-auto pl-10 pr-8 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition-all focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 outline-none appearance-none cursor-pointer"
+                 className="w-full md:w-auto pl-10 pr-8 py-3 bg-white border-2 border-orange-100 rounded-xl text-sm font-medium text-slate-700 hover:bg-orange-50 hover:border-orange-300 transition-colors focus:ring-2 focus:ring-orange-200 focus:border-orange-300 outline-none appearance-none cursor-pointer"
               >
                 <option value="ALL">Semua Status</option>
                 <option value="HADIR">✓ Hadir</option>
@@ -320,7 +320,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="flex-1 md:flex-initial px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition-all focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 outline-none cursor-pointer"
+                 className="flex-1 md:flex-initial px-4 py-3 bg-white border-2 border-orange-100 rounded-xl text-sm font-medium text-slate-700 hover:bg-orange-50 hover:border-orange-300 transition-colors focus:ring-2 focus:ring-orange-200 focus:border-orange-300 outline-none cursor-pointer"
               >
                 <option value="time">⏰ Waktu</option>
                 <option value="name">👤 Nama</option>
@@ -339,7 +339,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
             {/* Export Button */}
             <button
               onClick={exportToCSV}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:from-emerald-700 hover:to-emerald-800 font-semibold text-sm transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 font-semibold text-sm transition-colors whitespace-nowrap"
             >
               <Download className="w-5 h-5" />
               Export CSV
@@ -349,7 +349,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
           {/* Filter Summary */}
           <div className="mt-3 flex items-center gap-2 text-sm text-slate-600">
             <TrendingUp className="w-4 h-4" />
-            <span>Menampilkan <strong className="text-indigo-600 font-bold">{filteredAttendances.length}</strong> dari <strong>{stats.total}</strong> data</span>
+            <span>Showing <strong className="text-orange-600 font-bold">{filteredAttendances.length}</strong> of <strong>{stats.total}</strong> records</span>
           </div>
         </div>
 
@@ -398,17 +398,17 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
                   {filteredAttendances.map((attendance, index) => (
                     <tr 
                       key={attendance.id} 
-                      className="hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all duration-200 group"
+                      className="hover:bg-orange-50 transition-colors group"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-500 group-hover:text-indigo-600">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-500 group-hover:text-orange-600">
                         {index + 1}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                          <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm">
                             {attendance.student.name.charAt(0).toUpperCase()}
                           </div>
-                          <span className="text-sm font-semibold text-slate-900 group-hover:text-indigo-700">
+                          <span className="text-sm font-semibold text-slate-900 group-hover:text-orange-700">
                             {attendance.student.name}
                           </span>
                         </div>
@@ -428,7 +428,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
                         {attendance.status === 'IZIN' && attendance.reason ? (
                           <div className="text-sm text-slate-700">
                             <div className="flex items-start gap-2">
-                              <FileText className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                              <FileText className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
                               <span className="line-clamp-2" title={attendance.reason}>
                                 {attendance.reason}
                               </span>
@@ -469,7 +469,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
         {/* Footer */}
         <div className="bg-gradient-to-r from-slate-50 to-white px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t-2 border-slate-200 sticky bottom-0">
           <div className="flex items-center gap-2 text-sm text-slate-600">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <CheckCircle2 className="w-4 h-4 text-orange-600" />
             <span>Meeting ID: <strong className="font-mono text-slate-900">{meetingId}</strong></span>
           </div>
 

@@ -1,5 +1,87 @@
 @import "tailwindcss";
 
+/* Admin palette: orange and white only. Red remains available for destructive states. */
+.admin-dashboard [class*="bg-blue-"],
+.admin-dashboard [class*="bg-indigo-"],
+.admin-dashboard [class*="bg-purple-"],
+.admin-dashboard [class*="bg-pink-"],
+.admin-dashboard [class*="bg-emerald-"],
+.admin-dashboard [class*="bg-teal-"],
+.admin-dashboard [class*="bg-green-"],
+.admin-dashboard [class*="bg-yellow-"],
+.admin-dashboard [class*="bg-amber-"],
+.admin-dashboard [class*="bg-cyan-"] {
+  background-color: #fff7ed !important;
+  background-image: none !important;
+}
+
+.admin-dashboard [class*="from-blue-"],
+.admin-dashboard [class*="from-indigo-"],
+.admin-dashboard [class*="from-purple-"],
+.admin-dashboard [class*="from-pink-"],
+.admin-dashboard [class*="from-emerald-"],
+.admin-dashboard [class*="from-teal-"],
+.admin-dashboard [class*="from-green-"],
+.admin-dashboard [class*="from-yellow-"],
+.admin-dashboard [class*="from-amber-"],
+.admin-dashboard [class*="from-cyan-"],
+.admin-dashboard [class*="via-blue-"],
+.admin-dashboard [class*="via-indigo-"],
+.admin-dashboard [class*="via-purple-"],
+.admin-dashboard [class*="via-pink-"],
+.admin-dashboard [class*="via-emerald-"],
+.admin-dashboard [class*="via-teal-"],
+.admin-dashboard [class*="via-green-"],
+.admin-dashboard [class*="via-yellow-"],
+.admin-dashboard [class*="via-amber-"],
+.admin-dashboard [class*="to-blue-"],
+.admin-dashboard [class*="to-indigo-"],
+.admin-dashboard [class*="to-purple-"],
+.admin-dashboard [class*="to-pink-"],
+.admin-dashboard [class*="to-emerald-"],
+.admin-dashboard [class*="to-teal-"],
+.admin-dashboard [class*="to-green-"],
+.admin-dashboard [class*="to-yellow-"],
+.admin-dashboard [class*="to-amber-"],
+.admin-dashboard [class*="to-cyan-"] {
+  --tw-gradient-from: #fff7ed !important;
+  --tw-gradient-via: #fff7ed !important;
+  --tw-gradient-to: #fff7ed !important;
+  background-image: none !important;
+}
+
+.admin-dashboard [class*="text-blue-"],
+.admin-dashboard [class*="text-indigo-"],
+.admin-dashboard [class*="text-purple-"],
+.admin-dashboard [class*="text-pink-"],
+.admin-dashboard [class*="text-emerald-"],
+.admin-dashboard [class*="text-teal-"],
+.admin-dashboard [class*="text-green-"],
+.admin-dashboard [class*="text-yellow-"],
+.admin-dashboard [class*="text-amber-"],
+.admin-dashboard [class*="text-cyan-"] {
+  color: #c2410c !important;
+}
+
+.admin-dashboard [class*="border-blue-"],
+.admin-dashboard [class*="border-indigo-"],
+.admin-dashboard [class*="border-purple-"],
+.admin-dashboard [class*="border-pink-"],
+.admin-dashboard [class*="border-emerald-"],
+.admin-dashboard [class*="border-teal-"],
+.admin-dashboard [class*="border-green-"],
+.admin-dashboard [class*="border-yellow-"],
+.admin-dashboard [class*="border-amber-"],
+.admin-dashboard [class*="border-cyan-"],
+.admin-dashboard [class*="ring-blue-"],
+.admin-dashboard [class*="ring-indigo-"],
+.admin-dashboard [class*="ring-purple-"],
+.admin-dashboard [class*="ring-emerald-"],
+.admin-dashboard [class*="ring-green-"] {
+  border-color: #fed7aa !important;
+  --tw-ring-color: #fdba74 !important;
+}
+
 /* This is the foundational CSS file your tailwind.config.ts depends on. */
 
 :root {

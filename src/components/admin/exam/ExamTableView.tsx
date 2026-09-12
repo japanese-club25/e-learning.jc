@@ -157,7 +157,7 @@ export function ExamTableView({
                           <div className="text-sm sm:text-base font-medium text-gray-900">
                             {exam.name}
                           </div>
-                          <div className="text-xs sm:text-sm font-medium text-indigo-600">
+                          <div className="text-xs sm:text-sm font-medium text-orange-600">
                             {exam.exam_code}
                           </div>
                           <div className="text-xs sm:text-sm text-gray-500">
@@ -171,7 +171,7 @@ export function ExamTableView({
                               </div>
                             )}
                             {exam._count && (
-                              <div className="text-xs text-blue-600 flex items-center">
+                              <div className="text-xs text-orange-600 flex items-center">
                                 <Users className="h-3 w-3 mr-1" />
                                 {exam._count.scores} participants
                               </div>
@@ -201,7 +201,7 @@ export function ExamTableView({
                       <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
                         {exam._count ? (
                           <div className="flex items-center">
-                            <Users className="h-4 w-4 mr-1 text-blue-600" />
+                            <Users className="h-4 w-4 mr-1 text-orange-600" />
                             {exam._count.scores}
                           </div>
                         ) : (
@@ -212,7 +212,7 @@ export function ExamTableView({
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => onEdit(exam)}
-                            className="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors"
+                            className="text-orange-600 hover:text-orange-900 p-1 rounded hover:bg-orange-50 transition-colors"
                             title="Edit exam"
                           >
                             <Edit className="h-4 w-4" />
@@ -230,7 +230,7 @@ export function ExamTableView({
                               className={`p-1 rounded transition-colors ${
                                 exam.is_active
                                   ? 'text-red-600 hover:text-red-900 hover:bg-red-50'
-                                  : 'text-green-600 hover:text-green-900 hover:bg-green-50'
+                                  : 'text-orange-600 hover:text-orange-900 hover:bg-orange-50'
                               }`}
                               title={exam.is_active ? 'Deactivate exam' : 'Activate exam'}
                             >

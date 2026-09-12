@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
+import { requireStudentReady } from "@/service/auth/guards";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const studentId = searchParams.get('studentId');
     const examCode = searchParams.get('examCode');
+    const auth = await requireStudentReady();
+    if (auth.response) return auth.response;
+    const studentId = auth.user.id;
 
-    if (!studentId || !examCode) {
+    if (!examCode) {
       return NextResponse.json(
         { 
           success: false, 
-          message: "Student ID and exam code are required" 
+          message: "Exam code is required" 
         },
         { status: 400 }
       );
@@ -39,7 +42,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!student.is_submitted) {
+    const exam = await prisma.exam.findUnique({ where: { exam_code: examCode } });
+    if (!exam) {
+      return NextResponse.json({ success: false, message: "Exam not found" }, { status: 404 });
+    }
+    const attempt = await prisma.examAttempt.findUnique({
+      where: { exam_id_student_id: { exam_id: exam.id, student_id: studentId } },
+    });
+
+    if (!attempt || attempt.status !== "SUBMITTED") {
       return NextResponse.json(
         { 
           success: false, 
@@ -49,31 +60,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (student.exam_code !== examCode) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Invalid exam code for this student" 
-        },
-        { status: 400 }
-      );
-    }
-
     // Get exam details
-    const exam = await prisma.exam.findUnique({
-      where: { exam_code: examCode }
-    });
-
-    if (!exam) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Exam not found" 
-        },
-        { status: 404 }
-      );
-    }
-
     // Cek apakah exam sudah berakhir
     const now = new Date();
     if (exam.end_time && now < exam.end_time) {
@@ -91,9 +78,7 @@ export async function GET(request: NextRequest) {
       where: {
         exam_questions: {
           some: {
-            exam: {
-              category: student.category
-            }
+            exam_id: exam.id
           }
         }
       },

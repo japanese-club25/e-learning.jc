@@ -18,7 +18,7 @@ export interface LoginOptions {
 export class AuthService {
 
   // Login user with token-based authentication
-  static async login(credentials: LoginRequestDto, options?: LoginOptions): Promise<LoginResponse> {
+  static async loginAdmin(credentials: LoginRequestDto, options?: LoginOptions): Promise<LoginResponse> {
     try {
       // Find user by email
       const user = await AuthRepository.findByEmail(credentials.email);
@@ -48,6 +48,7 @@ export class AuthService {
       const authUser: AuthUser = {
         id: user.id,
         email: user.email,
+        role: "admin",
       };
 
       // Return token so API route can set cookies
@@ -93,8 +94,13 @@ export class AuthService {
       }
 
       return {
-        id: validatedToken.userId,
+        id: validatedToken.userId || validatedToken.studentId || "",
         email: validatedToken.email,
+        role: validatedToken.role,
+        isFirstLogin: validatedToken.isFirstLogin,
+        name: validatedToken.name,
+        class: validatedToken.class,
+        category: validatedToken.category,
       };
     } catch (error) {
       console.error("Get current user error:", error);
@@ -165,8 +171,13 @@ export class AuthService {
       }
 
       return {
-        id: validatedToken.userId,
+        id: validatedToken.userId || validatedToken.studentId || "",
         email: validatedToken.email,
+        role: validatedToken.role,
+        isFirstLogin: validatedToken.isFirstLogin,
+        name: validatedToken.name,
+        class: validatedToken.class,
+        category: validatedToken.category,
       };
     } catch (error) {
       console.error("Token validation error:", error);
@@ -189,6 +200,7 @@ export class AuthService {
         user: {
           id: user.id,
           email: user.email,
+          role: "admin",
         },
       };
     } catch (error) {
@@ -257,5 +269,4 @@ export class AuthService {
   }
 }
 
-// Export default instance
 export default AuthService;

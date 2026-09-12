@@ -70,8 +70,8 @@ export function StudentFilters({
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 bg-white"
           >
             <option value="all">All Status</option>
-            <option value="submitted">Submitted</option>
-            <option value="in-progress">In Progress</option>
+            <option value="submitted">Active Accounts</option>
+            <option value="in-progress">First Login</option>
           </select>
         </div>
         <div>

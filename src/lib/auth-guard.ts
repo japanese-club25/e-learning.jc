@@ -14,7 +14,7 @@ import { AuthService } from "@/service/auth";
 export async function requireAdmin(): Promise<NextResponse | null> {
   const user = await AuthService.getCurrentUser();
 
-  if (user) return null;
+  if (user?.role === "admin") return null;
 
   return NextResponse.json(
     { success: false, message: "Unauthorized" },

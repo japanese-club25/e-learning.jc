@@ -58,7 +58,7 @@ export default function LandingNavigation({ isDark, toggleTheme }: LandingNaviga
                   : 'bg-red-600 text-white hover:bg-red-500'
               }`}
             >
-              Admin Login
+              Login
             </button>
           </div>
         </div>

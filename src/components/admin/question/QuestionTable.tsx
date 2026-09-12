@@ -36,21 +36,21 @@ export function QuestionTable({
                 onClick={() => onSort('question_text')}
               >
                 <div className="flex items-center">
-                  <span className="mr-1">質問 • Question</span>
+                  <span className="mr-1">Question</span>
                   {sortField === 'question_text' && (
                     sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 text-indigo-600" /> : <ChevronDown className="h-4 w-4 text-indigo-600" />
                   )}
                 </div>
               </th>
               <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                試験 • Exam
+                Exam
               </th>
               <th 
                 className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors hidden md:table-cell"
                 onClick={() => onSort('correct_option')}
               >
                 <div className="flex items-center">
-                  <span className="mr-1">正解 • Answer</span>
+                  <span className="mr-1">Answer</span>
                   {sortField === 'correct_option' && (
                     sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 text-indigo-600" /> : <ChevronDown className="h-4 w-4 text-indigo-600" />
                   )}
@@ -61,14 +61,14 @@ export function QuestionTable({
                 onClick={() => onSort('created_at')}
               >
                 <div className="flex items-center">
-                  <span className="mr-1">作成日 • Created</span>
+                  <span className="mr-1">Created</span>
                   {sortField === 'created_at' && (
                     sortDirection === 'asc' ? <ChevronUp className="h-4 w-4 text-indigo-600" /> : <ChevronDown className="h-4 w-4 text-indigo-600" />
                   )}
                 </div>
               </th>
               <th className="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                操作 • Actions
+                Actions
               </th>
             </tr>
           </thead>

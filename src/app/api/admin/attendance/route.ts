@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
 import { isValidCoordinate } from "@/utils/geofence";
+import { requireAdmin } from "@/lib/auth-guard";
+import { generateAttendanceQrToken, hashAttendanceQrToken } from "@/lib/attendance-qr";
 
 // POST: create a new meeting (generates a unique meeting id and returns a qr payload)
 export async function POST(request: NextRequest) {
   try {
+    const denied = await requireAdmin();
+    if (denied) return denied;
     const { title, starts_at, ends_at, latitude, longitude } = await request.json();
 
     // Koordinat lokasi absensi bersifat opsional. Jika dikirim, keduanya wajib valid.
@@ -26,18 +30,16 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Get base URL from request headers
-    const protocol = request.headers.get('x-forwarded-proto') || 'http';
-    const host = request.headers.get('host') || 'localhost:3000';
-    const baseUrl = `${protocol}://${host}`;
-    
-    // Generate full URL for QR code
-    const attendanceUrl = `${baseUrl}/attendance/${meeting.id}`;
+    const qrToken = generateAttendanceQrToken();
+    const expiresAt = meeting.ends_at ?? null;
+    await prisma.meetingQrToken.create({
+      data: { meeting_id: meeting.id, token_hash: hashAttendanceQrToken(qrToken), expires_at: expiresAt },
+    });
     
     return NextResponse.json({ 
       success: true, 
       meeting, 
-      qr_payload: attendanceUrl // Now contains full URL instead of just ID
+      qr_payload: qrToken
     });
   } catch (error) {
     console.error("Create meeting error:", error);
@@ -48,6 +50,8 @@ export async function POST(request: NextRequest) {
 // GET: list meetings
 export async function GET(request: NextRequest) {
   try {
+    const denied = await requireAdmin();
+    if (denied) return denied;
     const meetings = await prisma.meeting.findMany({ 
       orderBy: { created_at: 'desc' },
       include: {

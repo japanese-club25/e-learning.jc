@@ -57,7 +57,6 @@ export default function ExamTestPage() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              studentId: studentData.student.id,
               violations: count
             }),
           });
@@ -176,7 +175,7 @@ export default function ExamTestPage() {
     if (!studentData) return;
 
     try {
-      const response = await fetch(`/api/student/exam-review?studentId=${studentData.student.id}&examCode=${studentData.student.exam_code}`);
+      const response = await fetch(`/api/student/exam-review?examCode=${studentData.student.exam_code}`);
       const result = await response.json();
 
       if (result.success) {
@@ -214,7 +213,6 @@ export default function ExamTestPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          studentId: studentData.student.id,
           examCode: studentData.student.exam_code,
           answers: formattedAnswers,
           violations: violations, // Include violation count in submission

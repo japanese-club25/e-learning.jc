@@ -40,6 +40,7 @@ model Exam {
   name           String         @default("")
   exam_questions ExamQuestion[]
   scores         Score[]
+  attempts       ExamAttempt[]
 
   @@map("exams")
 }
@@ -57,20 +58,41 @@ model ExamQuestion {
 }
 
 model Student {
-  id           String       @id @default(uuid())
-  name         String
-  class        String
-  exam_code    String
-  category     Category
-  started_at   DateTime?    @default(now())
-  violations   Int          @default(0)
-  is_submitted Boolean      @default(false)
-  created_at   DateTime     @default(now())
-  answers      Answer[]
-  Attendance   Attendance[]
-  scores       Score[]
+  id             String       @id @default(uuid())
+  email          String?      @unique
+  password_hash  String?
+  is_first_login Boolean      @default(true)
+  name           String
+  class          String
+  exam_code      String
+  category       Category
+  started_at     DateTime?    @default(now())
+  violations     Int          @default(0)
+  is_submitted   Boolean      @default(false)
+  created_at     DateTime     @default(now())
+  answers        Answer[]
+  Attendance     Attendance[]
+  scores         Score[]
+  ExamAttempt    ExamAttempt[]
+  AuthToken      AuthToken[]
 
   @@map("students")
+}
+
+model ExamAttempt {
+  id          String        @id @default(uuid())
+  exam_id     String
+  student_id  String
+  started_at  DateTime      @default(now())
+  finished_at DateTime?
+  status      AttemptStatus @default(IN_PROGRESS)
+  score       Int?
+
+  exam    Exam    @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@unique([exam_id, student_id])
+  @@map("exam_attempts")
 }
 
 model Answer {
@@ -133,8 +155,10 @@ model AdminUser {
 model AuthToken {
   id           String    @id @default(uuid())
   token        String    @unique
-  user_id      String
-  user         AdminUser @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id      String?
+  student_id   String?
+  user         AdminUser? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  student      Student?   @relation(fields: [student_id], references: [id], onDelete: Cascade)
   expires_at   DateTime
   created_at   DateTime  @default(now())
   last_used_at DateTime?
@@ -144,6 +168,7 @@ model AuthToken {
 
   @@index([token])
   @@index([user_id])
+  @@index([student_id])
   @@index([expires_at])
   @@map("auth_tokens")
 }
@@ -175,26 +200,43 @@ model Attendance {
 }
 
 model Meeting {
-  id                String      @id @default(uuid())
-  title             String      @default("")
+  id                String            @id @default(uuid())
+  title             String            @default("")
   starts_at         DateTime?
   ends_at           DateTime?
-  created_at        DateTime    @default(now())
-  updated_at        DateTime    @updatedAt
-  is_active         Boolean     @default(true)
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @updatedAt
+  is_active         Boolean           @default(true)
   // GPS geofencing (null latitude/longitude = geofence disabled for this meeting)
   latitude          Float?
   longitude         Float?
-  radius            Int         @default(150) // meters
+  radius            Int               @default(150) // meters
   // Google Sheets sync metadata (never source of truth)
-  google_sheet_id   String?     // Numeric sheetId within the spreadsheet
-  google_sheet_name String?     // Worksheet tab name e.g. "Meeting-abc123"
-  last_synced_at    DateTime?   // Timestamp of last successful sync
-  sync_status       SyncStatus  @default(PENDING)
-  sync_error        String?     // Last error message if sync failed
+  google_sheet_id   String? // Numeric sheetId within the spreadsheet
+  google_sheet_name String? // Worksheet tab name e.g. "Meeting-abc123"
+  last_synced_at    DateTime? // Timestamp of last successful sync
+  sync_status       SyncStatus        @default(PENDING)
+  sync_error        String? // Last error message if sync failed
   attendances       Attendance[]
+  qr_tokens         MeetingQrToken[]
 
   @@map("meetings")
+}
+
+model MeetingQrToken {
+  id         String    @id @default(uuid())
+  meeting_id String
+  token_hash String    @unique
+  expires_at DateTime?
+  is_revoked Boolean   @default(false)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  meeting Meeting @relation(fields: [meeting_id], references: [id], onDelete: Cascade)
+
+  @@index([meeting_id])
+  @@index([expires_at])
+  @@map("meeting_qr_tokens")
 }
 
 enum Category {
@@ -217,8 +259,14 @@ enum AttendanceStatus {
 }
 
 enum SyncStatus {
-  PENDING   // Never synced or reset
-  SYNCING   // In progress (prevents duplicate requests)
-  SYNCED    // Last sync was successful
-  FAILED    // Last sync failed, retry allowed
+  PENDING // Never synced or reset
+  SYNCING // In progress (prevents duplicate requests)
+  SYNCED // Last sync was successful
+  FAILED // Last sync failed, retry allowed
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  ABANDONED
 }

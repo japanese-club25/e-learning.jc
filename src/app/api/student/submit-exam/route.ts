@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
 import { Option } from "@prisma/client";
+import { requireStudentReady } from "@/service/auth/guards";
 
 interface SubmitExamData {
-  studentId: string;
   examCode: string;
   answers: Array<{
     questionId: string;
@@ -15,10 +15,13 @@ interface SubmitExamData {
 
 export async function POST(request: NextRequest) {
   try {
-    const { studentId, examCode, answers, violations = 0, autoSubmitted = false }: SubmitExamData = await request.json();
+    const auth = await requireStudentReady();
+    if (auth.response) return auth.response;
+    const studentId = auth.user.id;
+    const { examCode, answers, violations = 0, autoSubmitted = false }: SubmitExamData = await request.json();
 
     // Validasi input
-    if (!studentId || !examCode || !answers || !Array.isArray(answers)) {
+    if (!examCode || !answers || !Array.isArray(answers) || !Number.isInteger(violations) || violations < 0) {
       return NextResponse.json(
         { 
           success: false, 
@@ -53,16 +56,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (student.is_submitted) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Exam already submitted" 
-        },
-        { status: 400 }
-      );
-    }
-
     // Cek exam
     const exam = await prisma.exam.findUnique({
       where: { exam_code: examCode }
@@ -78,33 +71,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const attempt = await prisma.examAttempt.findUnique({
+      where: { exam_id_student_id: { exam_id: exam.id, student_id: studentId } },
+    });
+    if (!attempt) return NextResponse.json({ success: false, message: "Exam attempt not found" }, { status: 400 });
+    if (attempt.status !== "IN_PROGRESS") {
+      return NextResponse.json({ success: false, message: "Exam already submitted" }, { status: 400 });
+    }
+
     // Get all questions with their correct answers
     const questionIds = answers.map(a => a.questionId);
+    if (new Set(questionIds).size !== questionIds.length) {
+      return NextResponse.json({ success: false, message: "Duplicate questions are not allowed" }, { status: 400 });
+    }
     const questions = await prisma.question.findMany({
       where: {
         id: { in: questionIds },
         exam_questions: {
           some: {
-            exam: {
-              category: student.category
-            }
+            exam_id: exam.id
           }
         }
       },
-      include: {
-        exam_questions: {
-          include: {
-            exam: {
-              select: {
-                id: true,
-                name: true,
-                exam_code: true,
-                category: true
-              }
-            }
-          }
-        }
-      }
+      select: { id: true, correct_option: true }
     });
 
     if (questions.length !== answers.length) {
@@ -144,31 +133,40 @@ export async function POST(request: NextRequest) {
     }
 
     const totalQuestions = questions.length;
-    const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+    const percentage = totalQuestions === 0 ? 0 : Math.round((correctAnswers / totalQuestions) * 100);
 
     // Start transaction
     const result = await prisma.$transaction(async (tx) => {
       // Insert answers
-      await tx.answer.createMany({
-        data: answerData
-      });
+      await tx.answer.createMany({ data: answerData });
 
       // Insert score
-      const score = await tx.score.create({
-        data: {
+      const score = await tx.score.upsert({
+        where: { student_id_exam_id: { student_id: studentId, exam_id: exam.id } },
+        update: {
+          score: correctAnswers,
+          total_questions: totalQuestions,
+          percentage,
+        },
+        create: {
           student_id: studentId,
           exam_id: exam.id,
           score: correctAnswers,
           total_questions: totalQuestions,
           percentage: percentage
-        }
+        },
       });
+
+      const submittedAttempt = await tx.examAttempt.updateMany({
+        where: { id: attempt.id, status: "IN_PROGRESS" },
+        data: { status: "SUBMITTED", finished_at: new Date(), score: correctAnswers },
+      });
+      if (submittedAttempt.count !== 1) throw new Error("Exam already submitted");
 
       // Update student as submitted with violations count
       const updatedStudent = await tx.student.update({
         where: { id: studentId },
         data: {
-          is_submitted: true,
           violations: violations
         }
       });

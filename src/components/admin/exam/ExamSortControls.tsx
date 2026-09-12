@@ -27,7 +27,7 @@ export function ExamSortControls({
           onClick={() => onSort('category')}
           className={`px-3 py-1 rounded-md transition-colors ${
             sortField === 'category' 
-              ? 'bg-indigo-100 text-indigo-700 font-medium' 
+              ? 'bg-orange-100 text-orange-700 font-medium'
               : 'bg-gray-100 hover:bg-gray-200'
           }`}
         >
@@ -37,7 +37,7 @@ export function ExamSortControls({
           onClick={() => onSort('start_time')}
           className={`px-3 py-1 rounded-md transition-colors ${
             sortField === 'start_time' 
-              ? 'bg-indigo-100 text-indigo-700 font-medium' 
+              ? 'bg-orange-100 text-orange-700 font-medium'
               : 'bg-gray-100 hover:bg-gray-200'
           }`}
         >
@@ -47,7 +47,7 @@ export function ExamSortControls({
           onClick={() => onSort('status')}
           className={`px-3 py-1 rounded-md transition-colors ${
             sortField === 'status' 
-              ? 'bg-indigo-100 text-indigo-700 font-medium' 
+              ? 'bg-orange-100 text-orange-700 font-medium'
               : 'bg-gray-100 hover:bg-gray-200'
           }`}
         >
@@ -57,7 +57,7 @@ export function ExamSortControls({
           onClick={() => onSort('participants')}
           className={`px-3 py-1 rounded-md transition-colors ${
             sortField === 'participants' 
-              ? 'bg-indigo-100 text-indigo-700 font-medium' 
+              ? 'bg-orange-100 text-orange-700 font-medium'
               : 'bg-gray-100 hover:bg-gray-200'
           }`}
         >

@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
 import { Category } from "@prisma/client";
+import { requireStudentReady } from "@/service/auth/guards";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ category: string }> }
 ) {
   try {
+    const auth = await requireStudentReady();
+    if (auth.response) return auth.response;
     const { category } = await params;
     const url = new URL(request.url);
     const examCode = url.searchParams.get("examCode");
+
+    if (!examCode) {
+      return NextResponse.json({ success: false, message: "Exam code is required" }, { status: 400 });
+    }
 
     // Validasi category
     if (!Object.values(Category).includes(category as Category)) {
@@ -29,7 +36,7 @@ export async function GET(
           some: {
             exam: {
               category: category as Category,
-              ...(examCode && { exam_code: examCode })
+              exam_code: examCode
             }
           }
         }
@@ -55,8 +62,8 @@ export async function GET(
           },
           where: {
             exam: {
-              category: category as Category,
-              ...(examCode && { exam_code: examCode })
+               category: category as Category,
+               exam_code: examCode
             }
           }
         }

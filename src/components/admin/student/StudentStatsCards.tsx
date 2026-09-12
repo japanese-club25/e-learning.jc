@@ -7,14 +7,15 @@ interface StudentStatsCardsProps {
 }
 
 export function StudentStatsCards({ students }: StudentStatsCardsProps) {
-  const submittedCount = students.filter(s => s.is_submitted).length;
+  const submittedCount = students.filter(s => !s.is_first_login).length;
   const violationsCount = students.filter(s => s.violations > 0).length;
   
-  const averagePerformance = students.filter(s => s.scores.length > 0).length > 0 
+  const studentsWithScores = students.filter(s => (s.scores?.length ?? 0) > 0);
+  const averagePerformance = studentsWithScores.length > 0 
     ? students
-        .filter(s => s.scores.length > 0)
+        .filter(s => (s.scores?.length ?? 0) > 0)
         .reduce((sum, s) => {
-          const totalScore = s.scores.reduce((scoreSum, score) => {
+          const totalScore = (s.scores ?? []).reduce((scoreSum, score) => {
             // Handle percentage as Decimal (from Prisma) - convert to number
             if (score.percentage !== null && score.percentage !== undefined) {
               const percentageValue = typeof score.percentage === 'number' ? score.percentage : parseFloat(score.percentage.toString());
@@ -22,8 +23,8 @@ export function StudentStatsCards({ students }: StudentStatsCardsProps) {
             }
             return scoreSum + (score.total_questions > 0 ? (score.score / score.total_questions) * 100 : 0);
           }, 0);
-          return sum + (totalScore / s.scores.length);
-        }, 0) / students.filter(s => s.scores.length > 0).length
+          return sum + (totalScore / (s.scores?.length ?? 1));
+        }, 0) / studentsWithScores.length
     : 0;
 
   return (

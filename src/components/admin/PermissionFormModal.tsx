@@ -130,7 +130,7 @@ export default function PermissionFormModal({ onClose, onSuccess }: PermissionFo
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
         <div className="relative z-10 bg-white rounded-3xl shadow-2xl max-w-md w-full p-12 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-orange-500 rounded-full mb-4">
             <CheckCircle2 className="w-10 h-10 text-white" />
           </div>
           <h3 className="text-2xl font-bold text-slate-900 mb-2">Izin Berhasil Dicatat!</h3>
@@ -146,7 +146,7 @@ export default function PermissionFormModal({ onClose, onSuccess }: PermissionFo
       
       <div className="relative z-10 bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border-2 border-slate-200 animate-in zoom-in duration-300">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-6 sticky top-0 z-20">
+        <div className="bg-orange-600 p-6 sticky top-0 z-20">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
               <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-sm shadow-lg">
@@ -179,11 +179,11 @@ export default function PermissionFormModal({ onClose, onSuccess }: PermissionFo
           )}
 
           {/* Info Box */}
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="bg-orange-50 border-2 border-orange-200 rounded-xl p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-blue-900">Informasi</p>
-              <p className="text-sm text-blue-700 mt-1">
+              <p className="text-sm font-semibold text-orange-900">Information</p>
+              <p className="text-sm text-orange-700 mt-1">
                 Form ini digunakan untuk mencatat izin siswa yang tidak dapat hadir. Pastikan semua data diisi dengan benar.
               </p>
             </div>

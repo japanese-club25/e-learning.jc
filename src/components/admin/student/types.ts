@@ -1,14 +1,16 @@
 export interface Student {
   id: string;
   name: string;
+  email: string | null;
   class: string;
   exam_code: string;
   category: 'Gengo' | 'Bunka';
+  is_first_login: boolean;
   started_at: string | null;
   violations: number;
   is_submitted: boolean;
   created_at: string;
-  scores: Array<{
+  scores?: Array<{
     id: string;
     score: number;
     total_questions: number;

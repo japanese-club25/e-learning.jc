@@ -1,19 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import QRCode from "qrcode";
+import prisma from "@/config/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
+import { generateAttendanceQrToken, hashAttendanceQrToken } from "@/lib/attendance-qr";
 
 // POST: Generate QR code image for a meeting
 export async function POST(request: NextRequest) {
   try {
-    const { payload } = await request.json();
-
-    if (!payload) {
+    const denied = await requireAdmin();
+    if (denied) return denied;
+    const { meeting_id } = await request.json();
+    if (!meeting_id) {
       return NextResponse.json(
-        { success: false, message: "Payload is required" },
+        { success: false, message: "meeting_id is required" },
         { status: 400 }
       );
     }
 
-    // Generate QR code as data URL (base64 image)
+    const meeting = await prisma.meeting.findUnique({ where: { id: meeting_id } });
+    if (!meeting) return NextResponse.json({ success: false, message: "Meeting not found" }, { status: 404 });
+    await prisma.meetingQrToken.updateMany({ where: { meeting_id, is_revoked: false }, data: { is_revoked: true } });
+    const payload = generateAttendanceQrToken();
+    const token = await prisma.meetingQrToken.create({
+      data: { meeting_id, token_hash: hashAttendanceQrToken(payload!), expires_at: meeting.ends_at },
+    });
     const qrCodeDataURL = await QRCode.toDataURL(payload, {
       width: 400,
       margin: 2,
@@ -27,7 +37,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       qrCodeImage: qrCodeDataURL,
-      payload: payload,
+      payload,
+      tokenId: token.id,
     });
   } catch (error) {
     console.error("Generate QR code error:", error);
@@ -41,32 +52,19 @@ export async function POST(request: NextRequest) {
 // GET: Generate QR code for a specific meeting ID from query params
 export async function GET(request: NextRequest) {
   try {
+    const denied = await requireAdmin();
+    if (denied) return denied;
     const { searchParams } = new URL(request.url);
-    const payload = searchParams.get("payload");
+    const meetingId = searchParams.get("meeting_id");
 
-    if (!payload) {
+    if (!meetingId) {
       return NextResponse.json(
-        { success: false, message: "Payload query parameter is required" },
+        { success: false, message: "meeting_id query parameter is required" },
         { status: 400 }
       );
     }
 
-    // Generate QR code as data URL (base64 image)
-    const qrCodeDataURL = await QRCode.toDataURL(payload, {
-      width: 400,
-      margin: 2,
-      color: {
-        dark: "#000000",
-        light: "#FFFFFF",
-      },
-      errorCorrectionLevel: "H",
-    });
-
-    return NextResponse.json({
-      success: true,
-      qrCodeImage: qrCodeDataURL,
-      payload: payload,
-    });
+    return NextResponse.json({ success: false, message: "Use POST to generate a QR image without exposing the token" }, { status: 405 });
   } catch (error) {
     console.error("Generate QR code error:", error);
     return NextResponse.json(

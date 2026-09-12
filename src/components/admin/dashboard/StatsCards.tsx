@@ -23,43 +23,43 @@ export function StatsCards({ totalQuestions, totalExams, totalStudents, activeEx
   const statCards: StatCard[] = [
     {
       title: 'Total Questions',
-      titleJp: '質問総数',
+      titleJp: 'Total Questions',
       value: totalQuestions,
       icon: BookOpen,
-      gradient: 'from-blue-500 to-indigo-600',
-      bgGradient: 'from-blue-50 to-indigo-50',
-      textColor: 'text-indigo-700',
-      shadowColor: 'shadow-blue-200'
+      gradient: 'from-orange-500 to-orange-700',
+      bgGradient: 'from-white to-orange-50',
+      textColor: 'text-orange-700',
+      shadowColor: 'shadow-orange-200'
     },
     {
       title: 'Total Exams',
-      titleJp: '試験総数',
+      titleJp: 'Total Exams',
       value: totalExams,
       icon: Calendar,
-      gradient: 'from-emerald-500 to-teal-600',
-      bgGradient: 'from-emerald-50 to-teal-50',
-      textColor: 'text-teal-700',
-      shadowColor: 'shadow-emerald-200'
+      gradient: 'from-orange-500 to-orange-700',
+      bgGradient: 'from-white to-orange-50',
+      textColor: 'text-orange-700',
+      shadowColor: 'shadow-orange-200'
     },
     {
       title: 'Total Students',
-      titleJp: '学生総数',
+      titleJp: 'Total Students',
       value: totalStudents,
       icon: Users,
-      gradient: 'from-purple-500 to-pink-600',
-      bgGradient: 'from-purple-50 to-pink-50',
-      textColor: 'text-purple-700',
-      shadowColor: 'shadow-purple-200'
+      gradient: 'from-orange-500 to-orange-700',
+      bgGradient: 'from-white to-orange-50',
+      textColor: 'text-orange-700',
+      shadowColor: 'shadow-orange-200'
     },
     {
       title: 'Active Exams',
-      titleJp: '進行中試験',
+      titleJp: 'Active Exams',
       value: activeExams,
       icon: Clock,
-      gradient: 'from-amber-500 to-orange-600',
-      bgGradient: 'from-amber-50 to-orange-50',
+      gradient: 'from-orange-500 to-orange-700',
+      bgGradient: 'from-white to-orange-50',
       textColor: 'text-orange-700',
-      shadowColor: 'shadow-amber-200'
+      shadowColor: 'shadow-orange-200'
     }
   ];
 
@@ -68,12 +68,11 @@ export function StatsCards({ totalQuestions, totalExams, totalStudents, activeEx
       {statCards.map((card, index) => {
         const Icon = card.icon;
         return (
-          <div key={index} className={`bg-gradient-to-br ${card.bgGradient} rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:transform hover:scale-[1.02] border border-white/50 backdrop-blur-sm`}>
+          <div key={index} className={`bg-white rounded-2xl p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow border border-orange-100`}>
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex flex-col space-y-1 mb-4">
-                  <p className="text-xs sm:text-sm font-medium text-slate-600 tracking-wider uppercase">{card.titleJp}</p>
-                  <p className="text-xs text-slate-500 font-medium">{card.title}</p>
+                   <p className="text-xs sm:text-sm font-medium text-slate-500 tracking-wider uppercase">{card.title}</p>
                 </div>
                 <p className={`text-2xl sm:text-3xl font-bold ${card.textColor} leading-none tracking-tight`}>
                   {card.value.toLocaleString()}

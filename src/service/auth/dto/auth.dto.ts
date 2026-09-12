@@ -4,6 +4,11 @@ import { z } from "zod";
 export interface AuthUser {
   id: string;
   email: string;
+  role?: "admin" | "student";
+  isFirstLogin?: boolean;
+  name?: string;
+  class?: string;
+  category?: "Gengo" | "Bunka";
 }
 
 // Request DTOs

@@ -11,7 +11,7 @@ describe('requireAdmin', () => {
   beforeEach(() => getCurrentUser.mockReset());
 
   it('lets an authenticated admin through', async () => {
-    getCurrentUser.mockResolvedValue({ id: 'a1', email: 'admin@test.dev' });
+    getCurrentUser.mockResolvedValue({ id: 'a1', email: 'admin@test.dev', role: 'admin' });
     expect(await requireAdmin()).toBeNull();
   });
 

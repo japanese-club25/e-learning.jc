@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
 import { Category } from "@prisma/client";
 import { generateExamCode, validateExamCode } from "@/utils/examCodeGenerator";
+import { requireAdmin } from "@/lib/auth-guard";
 
 // GET all exams
 export async function GET(request: NextRequest) {
   try {
+    const denied = await requireAdmin();
+    if (denied) return denied;
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category') as Category | null;
     const page = parseInt(searchParams.get('page') || '1');
@@ -61,6 +64,8 @@ export async function GET(request: NextRequest) {
 // POST create new exam
 export async function POST(request: NextRequest) {
   try {
+    const denied = await requireAdmin();
+    if (denied) return denied;
     const body = await request.json();
     const {
       name,

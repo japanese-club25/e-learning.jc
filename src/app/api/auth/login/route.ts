@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
                       undefined;
 
     // Attempt login with token-based auth
-    const result = await AuthService.login(validatedData, {
+    const result = await AuthService.loginAdmin(validatedData, {
       userAgent,
       ipAddress,
     });

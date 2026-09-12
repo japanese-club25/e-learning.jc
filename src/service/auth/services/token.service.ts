@@ -5,14 +5,16 @@ import { TokenError } from "../errors/auth.errors";
 export interface TokenData {
   id: string;
   token: string;
-  userId: string;
+  userId?: string;
+  studentId?: string;
   expiresAt: Date;
   userAgent?: string;
   ipAddress?: string;
 }
 
 export interface CreateTokenOptions {
-  userId: string;
+  userId?: string;
+  studentId?: string;
   expiresInDays?: number;
   userAgent?: string;
   ipAddress?: string;
@@ -20,8 +22,14 @@ export interface CreateTokenOptions {
 
 export interface ValidatedToken {
   id: string;
-  userId: string;
+  userId?: string;
+  studentId?: string;
   email: string;
+  role: "admin" | "student";
+  isFirstLogin?: boolean;
+  name?: string;
+  class?: string;
+  category?: "Gengo" | "Bunka";
 }
 
 export class TokenService {
@@ -41,10 +49,15 @@ export class TokenService {
   static async createToken(options: CreateTokenOptions): Promise<TokenData> {
     const {
       userId,
+      studentId,
       expiresInDays = this.DEFAULT_EXPIRY_DAYS,
       userAgent,
       ipAddress,
     } = options;
+
+    if (!userId && !studentId) {
+      throw new TokenError("Must provide userId or studentId");
+    }
 
     try {
       const token = this.generateSecureToken();
@@ -55,6 +68,7 @@ export class TokenService {
         data: {
           token,
           user_id: userId,
+          student_id: studentId,
           expires_at: expiresAt,
           user_agent: userAgent,
           ip_address: ipAddress,
@@ -64,7 +78,8 @@ export class TokenService {
       return {
         id: authToken.id,
         token: authToken.token,
-        userId: authToken.user_id,
+        userId: authToken.user_id ?? undefined,
+        studentId: authToken.student_id ?? undefined,
         expiresAt: authToken.expires_at,
         userAgent: authToken.user_agent ?? undefined,
         ipAddress: authToken.ip_address ?? undefined,
@@ -89,6 +104,16 @@ export class TokenService {
               email: true,
             },
           },
+          student: {
+             select: {
+                id: true,
+                email: true,
+                is_first_login: true,
+                name: true,
+                class: true,
+                category: true,
+             }
+          }
         },
       });
 
@@ -115,11 +140,29 @@ export class TokenService {
         data: { last_used_at: new Date() },
       });
 
-      return {
-        id: authToken.id,
-        userId: authToken.user.id,
-        email: authToken.user.email,
-      };
+      if (authToken.user) {
+         return {
+           id: authToken.id,
+           userId: authToken.user.id,
+           email: authToken.user.email,
+           role: "admin"
+         };
+      }
+
+      if (authToken.student) {
+         return {
+            id: authToken.id,
+            studentId: authToken.student.id,
+            email: authToken.student.email ?? "",
+            role: "student",
+            isFirstLogin: authToken.student.is_first_login,
+            name: authToken.student.name,
+            class: authToken.student.class,
+            category: authToken.student.category,
+         };
+      }
+
+      return null;
     } catch (error) {
       console.error("Error validating token:", error);
       return null;
@@ -149,7 +192,10 @@ export class TokenService {
     try {
       await prisma.authToken.updateMany({
         where: { 
-          user_id: userId,
+          OR: [
+            { user_id: userId },
+            { student_id: userId }
+          ],
           is_revoked: false,
         },
         data: { is_revoked: true },
@@ -203,7 +249,10 @@ export class TokenService {
     try {
       const tokens = await prisma.authToken.findMany({
         where: {
-          user_id: userId,
+          OR: [
+             { user_id: userId },
+             { student_id: userId }
+          ],
           is_revoked: false,
           expires_at: { gt: new Date() },
         },

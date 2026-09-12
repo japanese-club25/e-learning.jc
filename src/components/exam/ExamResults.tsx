@@ -164,14 +164,14 @@ export default function ExamResults({
             )}
             
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/student/dashboard')}
               className={`px-8 py-4 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-105 ${
                 results.passed
                   ? 'bg-green-600 hover:bg-green-700'
                   : 'bg-gray-600 hover:bg-gray-700'
               }`}
             >
-              Back to Home
+              Back to Dashboard
             </button>
           </div>
         </div>

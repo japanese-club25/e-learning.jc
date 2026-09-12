@@ -1,27 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
+import { requireStudentReady } from "@/service/auth/guards";
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, examCode } = await request.json();
+    const auth = await requireStudentReady();
+    if (auth.response) return auth.response;
+    const { examCode } = await request.json();
 
-    if (!name || !examCode) {
+    if (!examCode) {
       return NextResponse.json(
         { 
           success: false, 
-          message: "Name and exam code are required" 
+          message: "Exam code is required" 
         },
         { status: 400 }
       );
     }
 
-    // Find student by name and exam code
+    // Identity comes from the authenticated session, never from the request.
     const student = await prisma.student.findFirst({
       where: {
-        name: {
-          contains: name.trim(),
-          mode: 'insensitive'
-        },
+        id: auth.user.id,
         exam_code: examCode.trim()
       },
       include: {

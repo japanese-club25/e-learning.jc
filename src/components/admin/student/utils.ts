@@ -1,7 +1,8 @@
 import { Student, StudentStats } from './types';
 
 export const calculateStudentStats = (student: Student): StudentStats => {
-  if (student.scores.length === 0) {
+  const scores = student.scores ?? [];
+  if (scores.length === 0) {
     return {
       totalScore: 0,
       totalExams: 0,
@@ -12,7 +13,7 @@ export const calculateStudentStats = (student: Student): StudentStats => {
   }
 
   // Handle percentage as Decimal (from Prisma) - convert to number
-  const percentageScores = student.scores.map(score => {
+  const percentageScores = scores.map(score => {
     // Convert Decimal/string to number, fallback to calculating from score/total_questions
     if (score.percentage !== null && score.percentage !== undefined) {
       const percentageValue = typeof score.percentage === 'number' ? score.percentage : parseFloat(score.percentage.toString());
@@ -22,7 +23,7 @@ export const calculateStudentStats = (student: Student): StudentStats => {
     return score.total_questions > 0 ? (score.score / score.total_questions) * 100 : 0;
   });
   
-  const totalExams = student.scores.length;
+  const totalExams = scores.length;
   const averageScore = percentageScores.reduce((sum, percentage) => sum + percentage, 0) / totalExams;
   const bestScore = Math.max(...percentageScores);
   const totalScore = percentageScores.reduce((sum, percentage) => sum + percentage, 0);
@@ -38,8 +39,9 @@ export const calculateStudentStats = (student: Student): StudentStats => {
 
 export const calculateStudentRank = (student: Student, allStudents: Student[]): number => {
   const allAverages = allStudents.map(s => {
-    if (s.scores.length === 0) return 0;
-    return s.scores.reduce((sum, score) => {
+    const scores = s.scores ?? [];
+    if (scores.length === 0) return 0;
+    return scores.reduce((sum, score) => {
       // Handle percentage as Decimal (from Prisma) - convert to number
       if (score.percentage !== null && score.percentage !== undefined) {
         const percentageValue = typeof score.percentage === 'number' ? score.percentage : parseFloat(score.percentage.toString());
@@ -47,7 +49,7 @@ export const calculateStudentRank = (student: Student, allStudents: Student[]): 
       }
       // Fallback: calculate percentage from score and total_questions
       return sum + (score.total_questions > 0 ? (score.score / score.total_questions) * 100 : 0);
-    }, 0) / s.scores.length;
+    }, 0) / scores.length;
   }).sort((a, b) => b - a);
   
   const studentStats = calculateStudentStats(student);

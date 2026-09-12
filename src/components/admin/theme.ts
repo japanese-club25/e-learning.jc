@@ -1,37 +1,37 @@
-// Japanese-inspired theme constants for admin components
+// Shared admin theme: orange and white.
 
 export const japaneseTheme = {
   // Color schemes
   colors: {
     primary: {
-      gradient: 'from-slate-900 via-indigo-900 to-slate-900',
-      solid: 'bg-slate-900',
-      light: 'bg-slate-100',
-      text: 'text-slate-900'
+      gradient: 'from-orange-600 to-orange-700',
+      solid: 'bg-orange-600',
+      light: 'bg-orange-50',
+      text: 'text-orange-700'
     },
     secondary: {
-      gradient: 'from-indigo-500 to-purple-600',
-      solid: 'bg-indigo-600',
-      light: 'bg-indigo-50',
-      text: 'text-indigo-700'
+      gradient: 'from-orange-500 to-orange-600',
+      solid: 'bg-orange-500',
+      light: 'bg-orange-50',
+      text: 'text-orange-700'
     },
     accent: {
-      gradient: 'from-yellow-400 to-amber-500',
-      solid: 'bg-yellow-400',
-      light: 'bg-yellow-50',
-      text: 'text-yellow-700'
+      gradient: 'from-orange-400 to-orange-500',
+      solid: 'bg-orange-400',
+      light: 'bg-orange-50',
+      text: 'text-orange-700'
     },
     success: {
-      gradient: 'from-emerald-500 to-teal-600',
-      solid: 'bg-emerald-500',
-      light: 'bg-emerald-50',
-      text: 'text-emerald-700'
+      gradient: 'from-orange-500 to-orange-600',
+      solid: 'bg-orange-500',
+      light: 'bg-orange-50',
+      text: 'text-orange-700'
     },
     warning: {
-      gradient: 'from-amber-500 to-orange-600',
-      solid: 'bg-amber-500',
-      light: 'bg-amber-50',
-      text: 'text-amber-700'
+      gradient: 'from-orange-500 to-orange-600',
+      solid: 'bg-orange-500',
+      light: 'bg-orange-50',
+      text: 'text-orange-700'
     },
     danger: {
       gradient: 'from-red-500 to-red-600',
@@ -43,29 +43,29 @@ export const japaneseTheme = {
 
   // Background styles
   backgrounds: {
-    main: 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50',
-    card: 'bg-white/80 backdrop-blur-sm',
-    cardHover: 'hover:shadow-2xl hover:transform hover:scale-[1.02]',
-    sidebar: 'bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900'
+    main: 'bg-orange-50/30',
+    card: 'bg-white',
+    cardHover: 'hover:shadow-lg',
+    sidebar: 'bg-white'
   },
 
   // Border and shadow styles
   effects: {
-    border: 'border border-slate-200/50',
-    borderHover: 'hover:border-indigo-200',
-    shadow: 'shadow-xl',
-    shadowHover: 'hover:shadow-2xl',
-    rounded: 'rounded-2xl',
-    transition: 'transition-all duration-300'
+    border: 'border border-orange-100',
+    borderHover: 'hover:border-orange-300',
+    shadow: 'shadow-sm',
+    shadowHover: 'hover:shadow-lg',
+    rounded: 'rounded-xl',
+    transition: 'transition-colors duration-200'
   },
 
   // Button styles
   buttons: {
-    primary: 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300',
-    secondary: 'bg-gradient-to-r from-slate-200 to-slate-300 text-slate-700 hover:from-slate-300 hover:to-slate-400 transition-all duration-300',
-    success: 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300',
+    primary: 'bg-orange-500 text-white hover:bg-orange-600 transition-colors',
+    secondary: 'bg-white border border-orange-200 text-orange-700 hover:bg-orange-50 transition-colors',
+    success: 'bg-orange-500 text-white hover:bg-orange-600 transition-colors',
     danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300',
-    ghost: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-300'
+    ghost: 'text-slate-600 hover:text-orange-700 hover:bg-orange-50 transition-colors'
   },
 
   // Typography

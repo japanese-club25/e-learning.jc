@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
+import { requireStudentReady } from "@/service/auth/guards";
 
 interface UpdateViolationsData {
-  studentId: string;
   violations: number;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { studentId, violations }: UpdateViolationsData = await request.json();
+    const auth = await requireStudentReady();
+    if (auth.response) return auth.response;
+    const { violations }: UpdateViolationsData = await request.json();
 
     // Validasi input
-    if (!studentId || violations === undefined) {
+    if (!Number.isInteger(violations) || violations < 0) {
       return NextResponse.json(
         { 
           success: false, 
@@ -23,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     // Cek student
     const student = await prisma.student.findUnique({
-      where: { id: studentId }
+      where: { id: auth.user.id }
     });
 
     if (!student) {
@@ -48,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     // Update violations count
     const updatedStudent = await prisma.student.update({
-      where: { id: studentId },
+      where: { id: auth.user.id },
       data: {
         violations: violations
       }
