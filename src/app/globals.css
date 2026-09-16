@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+@keyframes qr-scan-line {
+  0%, 100% {
+    top: 1rem;
+  }
+  50% {
+    top: calc(100% - 1rem);
+  }
+}
+
+.qr-scan-line {
+  animation: qr-scan-line 2.2s ease-in-out infinite;
+}
+
 /* Admin palette: orange and white only. Red remains available for destructive states. */
 .admin-dashboard [class*="bg-blue-"],
 .admin-dashboard [class*="bg-indigo-"],
