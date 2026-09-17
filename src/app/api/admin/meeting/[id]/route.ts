@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
+import { requireAdmin } from "@/lib/auth-guard";
 import { cookies } from "next/headers";
 import { TokenService } from "@/service/auth/services/token.service";
 
@@ -45,3 +46,53 @@ export async function GET(
 
   return NextResponse.json({ success: true, meeting });
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
+  const { id } = await context.params;
+
+  try {
+    const meeting = await prisma.meeting.findUnique({
+      where: { id },
+      include: {
+        _count: { select: { attendances: true, qr_tokens: true } },
+      },
+    });
+
+    if (!meeting) {
+      return NextResponse.json({ success: false, message: "Meeting not found" }, { status: 404 });
+    }
+
+    if (meeting.sync_status === "SYNCING") {
+      return NextResponse.json(
+        { success: false, message: "Meeting is currently syncing. Try again in a moment." },
+        { status: 409 }
+      );
+    }
+
+    const attendanceCount = meeting._count.attendances;
+    const qrTokenCount = meeting._count.qr_tokens;
+
+    // Database FK cascade handles Attendance + MeetingQrToken deletion automatically.
+    await prisma.meeting.delete({ where: { id } });
+
+    return NextResponse.json({
+      success: true,
+      message: "Meeting and all related data deleted successfully.",
+      deleted: {
+        meeting_id: id,
+        attendance_count: attendanceCount,
+        qr_token_count: qrTokenCount,
+      },
+    });
+  } catch (error) {
+    console.error("Delete meeting error:", error);
+    return NextResponse.json({ success: false, message: "Failed to delete meeting" }, { status: 500 });
+  }
+}
+

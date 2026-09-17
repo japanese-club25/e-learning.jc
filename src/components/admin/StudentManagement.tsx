@@ -354,7 +354,7 @@ export function StudentManagement() {
           </h1>
         </div>
         <div className="flex items-center space-x-4 text-sm">
-          <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-600 text-white cursor-pointer hover:bg-indigo-700">
+          <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-600 text-white cursor-pointer hover:bg-orange-700 shadow-sm">
             <Upload className="h-4 w-4" />
             {importing ? "Importing..." : "Import CSV/XLSX"}
             <input
@@ -372,7 +372,7 @@ export function StudentManagement() {
           <button
             type="button"
             onClick={() => setShowCreateForm(true)}
-            className="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
+            className="px-3 py-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700 shadow-sm"
           >
             + Add Student
           </button>

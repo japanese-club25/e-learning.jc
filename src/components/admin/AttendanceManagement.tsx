@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { QrCode, PlusCircle, Clock, Copy, Search, Calendar, Users, TrendingUp, X, CheckCircle2, AlertCircle, Info, Lightbulb, Power, FileText } from 'lucide-react';
+import { QrCode, PlusCircle, Clock, Copy, Search, Calendar, Users, TrendingUp, X, CheckCircle2, AlertCircle, Info, Lightbulb, Power, FileText, Trash2 } from 'lucide-react';
 import MeetingStatusToggle from './MeetingStatusToggle';
 import AttendanceDetailModal from './AttendanceDetailModal';
 import PermissionFormModal from './PermissionFormModal';
@@ -35,6 +35,35 @@ export function AttendanceManagement() {
   const [selectedMeetingForDetail, setSelectedMeetingForDetail] = useState<string | null>(null);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [meetingCoords, setMeetingCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [meetingToDelete, setMeetingToDelete] = useState<Meeting | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDeleteMeeting() {
+    if (!meetingToDelete) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/meeting/${meetingToDelete.id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.message || 'Failed to delete meeting');
+        setDeleting(false);
+        return;
+      }
+      // Close any open modals that reference the deleted meeting
+      if (selectedMeetingForDetail === meetingToDelete.id) setSelectedMeetingForDetail(null);
+      if (selectedMeetingForToggle === meetingToDelete.id) setSelectedMeetingForToggle(null);
+      if (showQrModal) { setShowQrModal(false); setQrPayload(null); setQrCodeImage(null); }
+      setMeetingToDelete(null);
+      setSuccess('Meeting deleted successfully.');
+      setTimeout(() => setSuccess(null), 3000);
+      await fetchMeetings();
+    } catch {
+      setError('Network error');
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   async function fetchMeetings() {
     try {
@@ -538,25 +567,29 @@ export function AttendanceManagement() {
                           <Power className="w-4 h-4" />
                           <span>Toggle</span>
                         </button>
-                        <button
-                          onClick={() => openQr(m)}
+                         <button
+                           onClick={() => openQr(m)}
                            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm font-semibold transition-colors"
-                        >
-                          <QrCode className="w-4 h-4" />
-                          <span>QR</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            openQr(m);
-                            setSuccess("QR regenerated!");
-                            setTimeout(() => setSuccess(null), 2000);
-                          }}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 rounded-lg text-slate-700 text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all transform hover:scale-105"
-                          title="Regenerate attendance QR"
-                        >
-                          <Copy className="w-4 h-4" />
-                          <span className="hidden sm:inline">Regenerate</span>
-                        </button>
+                         >
+                           <QrCode className="w-4 h-4" />
+                           <span>QR</span>
+                         </button>
+                         <button
+                           onClick={() => { openQr(m); setSuccess('QR regenerated!'); setTimeout(() => setSuccess(null), 2000); }}
+                           className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-slate-200 rounded-lg text-slate-700 text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                           title="Regenerate attendance QR"
+                         >
+                           <Copy className="w-4 h-4" />
+                           <span className="hidden sm:inline">Regenerate</span>
+                         </button>
+                         <button
+                           onClick={() => setMeetingToDelete(m)}
+                           className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-red-200 rounded-lg text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors"
+                           title="Delete meeting and all attendance data"
+                         >
+                           <Trash2 className="w-4 h-4" />
+                           <span className="hidden sm:inline">Delete</span>
+                         </button>
                       </div>
                     </div>
                   </li>
@@ -848,6 +881,79 @@ export function AttendanceManagement() {
             fetchMeetings();
           }}
         />
+      )}
+
+      {/* Delete Meeting Confirmation Modal */}
+      {meetingToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !deleting && setMeetingToDelete(null)} />
+          <div className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 animate-in zoom-in duration-200">
+            <div className="bg-red-600 p-6 rounded-t-2xl">
+              <div className="flex items-center gap-3">
+                <div className="bg-white/20 p-2.5 rounded-xl">
+                  <Trash2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Delete Meeting?</h3>
+                  <p className="text-red-100 text-sm mt-0.5">This action cannot be undone.</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <p className="text-slate-700 font-medium mb-1 truncate">
+                &ldquo;{meetingToDelete.title}&rdquo;
+              </p>
+              <p className="text-slate-500 text-sm mb-5">
+                Permanently deletes this meeting and all related data:
+              </p>
+              <ul className="space-y-2 mb-6 text-sm">
+                {[
+                  'All attendance records for this meeting',
+                  'All QR tokens for this meeting',
+                  'Meeting schedule and settings',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-slate-600">
+                    <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setMeetingToDelete(null); setError(null); }}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-slate-700 font-semibold text-sm hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteMeeting}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl font-semibold text-sm hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  {deleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Delete Meeting
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
