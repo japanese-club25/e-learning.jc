@@ -88,7 +88,7 @@ export default function ExamTestPage() {
         setTimeLeft(data.exam.duration * 60); // Convert minutes to seconds
         
         // Fetch questions
-        const response = await fetch(`/api/student/questions/${data.student.category}?examCode=${data.student.exam_code}`);
+        const response = await fetch(`/api/student/questions/all?examCode=${data.exam.exam_code}`);
         const questionsData = await response.json();
 
         if (questionsData.success) {
@@ -175,7 +175,7 @@ export default function ExamTestPage() {
     if (!studentData) return;
 
     try {
-      const response = await fetch(`/api/student/exam-review?examCode=${studentData.student.exam_code}`);
+      const response = await fetch(`/api/student/exam-review?examCode=${studentData.exam.exam_code}`);
       const result = await response.json();
 
       if (result.success) {
@@ -213,7 +213,7 @@ export default function ExamTestPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          examCode: studentData.student.exam_code,
+          examCode: studentData.exam.exam_code,
           answers: formattedAnswers,
           violations: violations, // Include violation count in submission
           autoSubmitted: violations >= 3 // Flag if auto-submitted due to violations

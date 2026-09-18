@@ -1,13 +1,9 @@
-import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import bcrypt from "bcryptjs";
 import prisma from "@/config/prisma";
 import { requireAdmin } from "@/lib/auth-guard";
 import { normalizeStudentRow, parseStudentFile } from "@/lib/student-import";
-
-function generatedExamCode() {
-  return `STU-${randomBytes(5).toString("hex").toUpperCase()}`;
-}
 
 export async function POST(request: NextRequest) {
   const denied = await requireAdmin();
@@ -32,24 +28,18 @@ export async function POST(request: NextRequest) {
         const student = normalizeStudentRow(raw);
         const password = student.password || randomBytes(9).toString("base64url");
         const passwordHash = await bcrypt.hash(password, 10);
-        let examCode = student.examCode || generatedExamCode();
-        while (await prisma.exam.findUnique({ where: { exam_code: examCode }, select: { id: true } }) || await prisma.student.findFirst({ where: { exam_code: examCode }, select: { id: true } })) {
-          examCode = generatedExamCode();
-        }
-
         await prisma.student.create({
           data: {
             name: student.name,
             email: student.email,
             class: student.className,
-            exam_code: examCode,
             password_hash: passwordHash,
             is_first_login: true,
           },
         });
         created++;
       } catch (error: any) {
-        errors.push({ row: index + 2, email: String(raw.email || raw.Email || "") || undefined, error: error?.code === "P2002" ? "email or exam_code already exists" : error.message || "invalid row" });
+        errors.push({ row: index + 2, email: String(raw.email || raw.Email || "") || undefined, error: error?.code === "P2002" ? "email already exists" : error.message || "invalid row" });
       }
     }
 

@@ -3,7 +3,6 @@ export interface Student {
   name: string;
   email: string | null;
   class: string;
-  exam_code: string;
   is_first_login: boolean;
   started_at: string | null;
   violations: number;

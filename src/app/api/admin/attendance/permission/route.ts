@@ -71,7 +71,6 @@ export async function POST(request: NextRequest) {
         data: {
           name: name.trim(),
           class: className.trim(),
-          exam_code: '', // Bisa diisi nanti saat ikut ujian
         }
       });
     }

@@ -193,7 +193,7 @@ export function StudentManagement() {
         ? students.filter((s) => selectedStudents.includes(s.id))
         : sortedStudents;
 
-    const csv = ["Name,Email,Class,Exam Code,Account Status,Created At", ...dataToExport.map((student) => [student.name, student.email || "", student.class, student.exam_code, student.is_first_login ? "First Login" : "Active", new Date(student.created_at).toLocaleDateString()].map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))].join("\n");
+    const csv = ["Name,Email,Class,Account Status,Created At", ...dataToExport.map((student) => [student.name, student.email || "", student.class, student.is_first_login ? "First Login" : "Active", new Date(student.created_at).toLocaleDateString()].map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))].join("\n");
     const link = document.createElement("a");
     link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
     link.download = `students-${new Date().toISOString().slice(0, 10)}.csv`;
@@ -252,7 +252,7 @@ export function StudentManagement() {
       const data = await response.json();
       if (!response.ok || !data.success)
         throw new Error(data.message || "Failed to create student");
-      setImportResult(`Student created. Exam Code: ${data.student.exam_code}`);
+    setImportResult("Student created.");
       setCreateForm({
         name: "",
         email: "",
@@ -275,7 +275,7 @@ export function StudentManagement() {
     const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.class.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.exam_code.toLowerCase().includes(searchTerm.toLowerCase());
+      false;
 
     const matchesStatus =
       statusFilter === "all" ||

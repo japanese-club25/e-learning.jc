@@ -76,7 +76,6 @@ export async function POST(request: NextRequest) {
        student = await prisma.student.update({
           where: { id: student.id },
           data: {
-             exam_code: exam.exam_code,
              started_at: student.started_at || now.toISOString(),
           }
        });

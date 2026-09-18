@@ -45,7 +45,6 @@ export async function GET(request: NextRequest) {
           name: true,
           email: true,
           class: true,
-          exam_code: true,
           is_first_login: true,
           created_at: true,
         },
@@ -101,10 +100,9 @@ export async function POST(request: NextRequest) {
     }
 
     const password_hash = await bcrypt.hash(password, 10);
-    const exam_code = `STU-${randomBytes(5).toString('hex').toUpperCase()}`;
     const student = await prisma.student.create({
-      data: { name, email, class: className, password_hash, exam_code, is_first_login: true },
-      select: { id: true, name: true, email: true, class: true, exam_code: true, is_first_login: true, created_at: true },
+      data: { name, email, class: className, password_hash, is_first_login: true },
+      select: { id: true, name: true, email: true, class: true, is_first_login: true, created_at: true },
     });
     return NextResponse.json({ success: true, student }, { status: 201 });
   } catch (error: any) {

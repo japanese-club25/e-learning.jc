@@ -64,7 +64,6 @@ model Student {
   is_first_login Boolean      @default(true)
   name           String
   class          String
-  exam_code      String
   started_at     DateTime?    @default(now())
   violations     Int          @default(0)
   is_submitted   Boolean      @default(false)

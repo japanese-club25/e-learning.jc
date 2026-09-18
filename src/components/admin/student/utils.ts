@@ -81,7 +81,6 @@ export const exportStudentsToCSV = (students: Student[]) => {
     return {
       Name: student.name,
       Class: student.class,
-      'Exam Code': student.exam_code,
       Status: student.is_submitted ? 'Submitted' : 'In Progress',
       'Average Score': stats.averageScore.toFixed(1) + '%',
       'Best Score': stats.bestScore.toFixed(1) + '%',

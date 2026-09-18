@@ -32,7 +32,6 @@ export async function POST(request: NextRequest) {
                     class: student.class,
                     password_hash: passwordHash,
                     is_first_login: true,
-                    exam_code: "",
                 }
             });
             createdCount++;
