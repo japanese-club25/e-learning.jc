@@ -150,7 +150,7 @@ export async function GET(request: NextRequest) {
           id: student.id,
           name: student.name,
           class: student.class,
-          category: student.category
+          category: exam.category
         },
         score: score ? {
           score: score.score,

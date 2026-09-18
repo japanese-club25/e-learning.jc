@@ -33,7 +33,6 @@ export async function POST(request: NextRequest) {
                     password_hash: passwordHash,
                     is_first_login: true,
                     exam_code: "",
-                    category: "Gengo"
                 }
             });
             createdCount++;

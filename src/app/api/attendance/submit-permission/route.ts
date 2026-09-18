@@ -94,7 +94,6 @@ export async function POST(request: NextRequest) {
           name: name.trim(),
           class: className.trim(),
           exam_code: '',
-          category: 'Gengo',
         }
       });
     }

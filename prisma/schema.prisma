@@ -65,7 +65,6 @@ model Student {
   name           String
   class          String
   exam_code      String
-  category       Category
   started_at     DateTime?    @default(now())
   violations     Int          @default(0)
   is_submitted   Boolean      @default(false)

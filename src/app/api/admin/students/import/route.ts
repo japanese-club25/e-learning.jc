@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
             name: student.name,
             email: student.email,
             class: student.className,
-            category: student.category,
             exam_code: examCode,
             password_hash: passwordHash,
             is_first_login: true,

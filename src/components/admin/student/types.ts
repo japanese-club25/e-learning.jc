@@ -4,7 +4,6 @@ export interface Student {
   email: string | null;
   class: string;
   exam_code: string;
-  category: 'Gengo' | 'Bunka';
   is_first_login: boolean;
   started_at: string | null;
   violations: number;
@@ -47,7 +46,7 @@ export interface StudentStats {
   rank: number;
 }
 
-export type SortField = 'name' | 'class' | 'category' | 'status' | 'performance' | 'violations' | 'created_at';
+export type SortField = 'name' | 'class' | 'status' | 'performance' | 'violations' | 'created_at';
 export type SortDirection = 'asc' | 'desc';
 export type CategoryFilter = 'all' | 'Gengo' | 'Bunka';
 export type StatusFilter = 'all' | 'submitted' | 'in-progress';

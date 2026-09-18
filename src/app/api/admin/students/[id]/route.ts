@@ -16,7 +16,6 @@ export async function GET(
             exam: {
               select: {
                 id: true,
-                category: true,
                 created_at: true
               }
             }

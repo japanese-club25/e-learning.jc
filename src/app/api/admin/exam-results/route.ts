@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     prisma.score.findMany({
       where,
       include: {
-        student: { select: { id: true, name: true, email: true, class: true, category: true, violations: true } },
+        student: { select: { id: true, name: true, email: true, class: true, violations: true } },
         exam: { select: { id: true, name: true, exam_code: true, category: true } },
       },
       orderBy: { created_at: "desc" },

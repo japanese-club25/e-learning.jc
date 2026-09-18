@@ -1,28 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
-import { Category } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, class: className, exam_code, category } = await request.json();
+    const { name, class: className, exam_code } = await request.json();
 
     // Validasi input
-    if (!name || !className || !exam_code || !category) {
+    if (!name || !className || !exam_code) {
       return NextResponse.json(
         { 
           success: false, 
-          message: "Name, class, exam code, and category are required" 
-        },
-        { status: 400 }
-      );
-    }
-
-    // Validasi category
-    if (!Object.values(Category).includes(category)) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Invalid category. Must be 'Gengo' or 'Bunka'" 
+          message: "Name, class, and exam code are required" 
         },
         { status: 400 }
       );
@@ -82,24 +70,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Cek apakah kategori exam sesuai
-    if (exam.category !== category) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: `This exam code is for ${exam.category} category, not ${category}` 
-        },
-        { status: 400 }
-      );
-    }
-
     // Cek apakah student sudah pernah login dengan exam_code yang sama
     const existingStudent = await prisma.student.findFirst({
       where: {
         name,
         class: className,
-        exam_code,
-        category
+        exam_code
       }
     });
 
@@ -136,7 +112,6 @@ export async function POST(request: NextRequest) {
         name,
         class: className,
         exam_code,
-        category,
         started_at: now.toISOString(),
         is_submitted: false,
         violations: 0

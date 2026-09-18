@@ -8,7 +8,7 @@ export async function GET() {
 
   const student = await prisma.student.findUnique({
     where: { id: auth.user.id },
-    select: { id: true, name: true, email: true, class: true, category: true, is_first_login: true },
+    select: { id: true, name: true, email: true, class: true, is_first_login: true },
   });
   if (!student) return NextResponse.json({ success: false, message: "Student not found" }, { status: 404 });
   return NextResponse.json({ success: true, user: { ...student, role: "student" } });

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
-import { Category } from "@prisma/client";
 import { requireStudentReady } from "@/service/auth/guards";
 
 export async function GET(
@@ -10,7 +9,6 @@ export async function GET(
   try {
     const auth = await requireStudentReady();
     if (auth.response) return auth.response;
-    const { category } = await params;
     const url = new URL(request.url);
     const examCode = url.searchParams.get("examCode");
 
@@ -18,26 +16,17 @@ export async function GET(
       return NextResponse.json({ success: false, message: "Exam code is required" }, { status: 400 });
     }
 
-    // Validasi category
-    if (!Object.values(Category).includes(category as Category)) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Invalid category. Must be 'Gengo' or 'Bunka'" 
-        },
-        { status: 400 }
-      );
-    }
+    const exam = await prisma.exam.findUnique({ where: { exam_code: examCode } });
+    if (!exam) return NextResponse.json({ success: false, message: "Exam not found" }, { status: 404 });
+    const attempt = await prisma.examAttempt.findUnique({ where: { exam_id_student_id: { exam_id: exam.id, student_id: auth.user.id } } });
+    if (!attempt) return NextResponse.json({ success: false, message: "Exam attempt not found" }, { status: 403 });
 
     // Get questions for the specific category through exam relationship
     const questions = await prisma.question.findMany({
       where: {
         exam_questions: {
           some: {
-            exam: {
-              category: category as Category,
-              exam_code: examCode
-            }
+            exam: { id: exam.id }
           }
         }
       },
@@ -61,10 +50,7 @@ export async function GET(
             }
           },
           where: {
-            exam: {
-               category: category as Category,
-               exam_code: examCode
-            }
+             exam: { id: exam.id }
           }
         }
       },
@@ -77,7 +63,7 @@ export async function GET(
       return NextResponse.json(
         { 
           success: false, 
-          message: `No questions found for category: ${category}` 
+          message: "No questions found for this exam" 
         },
         { status: 404 }
       );
@@ -103,7 +89,7 @@ export async function GET(
       success: true,
       questions: transformedQuestions,
       total: questions.length,
-      category
+      examCode
     });
 
   } catch (error) {

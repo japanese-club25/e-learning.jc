@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/config/prisma";
-import { AuthService } from "@/service/auth";
 import { requireStudentReady } from "@/service/auth/guards";
 
 export async function POST(request: NextRequest) {
@@ -42,8 +41,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: "Exam has already ended" }, { status: 400 });
     }
 
-    // Assign category and exam_code to student (temporary, until student-exam M:N logic is refactored if needed)
-    // Currently relying on existing DB structure where Student has category and exam_code
     let student = await prisma.student.findUnique({ where: { id: user.id }});
     
     if (!student) {
@@ -80,7 +77,6 @@ export async function POST(request: NextRequest) {
           where: { id: student.id },
           data: {
              exam_code: exam.exam_code,
-             category: exam.category,
              started_at: student.started_at || now.toISOString(),
           }
        });

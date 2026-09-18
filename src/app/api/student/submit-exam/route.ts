@@ -46,15 +46,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (student.exam_code !== examCode) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          message: "Invalid exam code for this student" 
-        },
-        { status: 400 }
-      );
-    }
 
     // Cek exam
     const exam = await prisma.exam.findUnique({
@@ -100,7 +91,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false, 
-          message: "Some questions not found or invalid for this category" 
+          message: "Some questions not found or invalid for this exam" 
         },
         { status: 400 }
       );

@@ -41,7 +41,6 @@ export function StudentManagement() {
     name: "",
     email: "",
     class: "",
-    category: "Gengo",
     password: "",
   });
   const [creating, setCreating] = useState(false);
@@ -194,7 +193,7 @@ export function StudentManagement() {
         ? students.filter((s) => selectedStudents.includes(s.id))
         : sortedStudents;
 
-    const csv = ["Name,Email,Class,Exam Code,Category,Account Status,Created At", ...dataToExport.map((student) => [student.name, student.email || "", student.class, student.exam_code, student.category, student.is_first_login ? "First Login" : "Active", new Date(student.created_at).toLocaleDateString()].map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))].join("\n");
+    const csv = ["Name,Email,Class,Exam Code,Account Status,Created At", ...dataToExport.map((student) => [student.name, student.email || "", student.class, student.exam_code, student.is_first_login ? "First Login" : "Active", new Date(student.created_at).toLocaleDateString()].map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))].join("\n");
     const link = document.createElement("a");
     link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
     link.download = `students-${new Date().toISOString().slice(0, 10)}.csv`;
@@ -231,7 +230,6 @@ export function StudentManagement() {
         name: "Example Student",
         email: "student@example.com",
         class: "Class A",
-        category: "Gengo",
         password: "",
         exam_code: "",
       },
@@ -259,7 +257,6 @@ export function StudentManagement() {
         name: "",
         email: "",
         class: "",
-        category: "Gengo",
         password: "",
       });
       setShowCreateForm(false);
@@ -280,15 +277,12 @@ export function StudentManagement() {
       student.class.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.exam_code.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory =
-      categoryFilter === "all" || student.category === categoryFilter;
-
     const matchesStatus =
       statusFilter === "all" ||
       (statusFilter === "submitted" && !student.is_first_login) ||
       (statusFilter === "in-progress" && student.is_first_login);
 
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesStatus;
   });
 
   // Sort students
@@ -304,10 +298,6 @@ export function StudentManagement() {
       case "class":
         valueA = a.class.toLowerCase();
         valueB = b.class.toLowerCase();
-        break;
-      case "category":
-        valueA = a.category;
-        valueB = b.category;
         break;
       case "status":
         valueA = a.is_first_login ? 0 : 1;
@@ -460,25 +450,6 @@ export function StudentManagement() {
               </div>
             );
           })}
-          <div>
-            <label
-              htmlFor="create-student-category"
-              className="mb-1 block text-sm font-medium text-gray-700"
-            >
-              Category
-            </label>
-            <select
-              id="create-student-category"
-              value={createForm.category}
-              onChange={(event) =>
-                setCreateForm({ ...createForm, category: event.target.value })
-              }
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900"
-            >
-              <option value="Gengo">Gengo</option>
-              <option value="Bunka">Bunka</option>
-            </select>
-          </div>
           <div className="md:col-span-2 flex gap-2 justify-end">
             <button
               type="button"

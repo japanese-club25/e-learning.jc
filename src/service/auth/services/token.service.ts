@@ -111,7 +111,6 @@ export class TokenService {
                 is_first_login: true,
                 name: true,
                 class: true,
-                category: true,
              }
           }
         },
@@ -158,7 +157,6 @@ export class TokenService {
             isFirstLogin: authToken.student.is_first_login,
             name: authToken.student.name,
             class: authToken.student.class,
-            category: authToken.student.category,
          };
       }
 

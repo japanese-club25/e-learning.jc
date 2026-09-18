@@ -46,7 +46,6 @@ export async function GET(request: NextRequest) {
           email: true,
           class: true,
           exam_code: true,
-          category: true,
           is_first_login: true,
           created_at: true,
         },
@@ -89,7 +88,6 @@ export async function POST(request: NextRequest) {
     const name = String(body.name || '').trim();
     const email = String(body.email || '').trim().toLowerCase();
     const className = String(body.class || '').trim();
-    const category = body.category as Category;
     const password = String(body.password || '');
 
     if (!name || !email || !className || !password) {
@@ -101,15 +99,12 @@ export async function POST(request: NextRequest) {
     if (password.length < 6) {
       return NextResponse.json({ success: false, message: 'Password must be at least 6 characters' }, { status: 400 });
     }
-    if (!Object.values(Category).includes(category)) {
-      return NextResponse.json({ success: false, message: 'Invalid category' }, { status: 400 });
-    }
 
     const password_hash = await bcrypt.hash(password, 10);
     const exam_code = `STU-${randomBytes(5).toString('hex').toUpperCase()}`;
     const student = await prisma.student.create({
-      data: { name, email, class: className, category, password_hash, exam_code, is_first_login: true },
-      select: { id: true, name: true, email: true, class: true, category: true, exam_code: true, is_first_login: true, created_at: true },
+      data: { name, email, class: className, password_hash, exam_code, is_first_login: true },
+      select: { id: true, name: true, email: true, class: true, exam_code: true, is_first_login: true, created_at: true },
     });
     return NextResponse.json({ success: true, student }, { status: 201 });
   } catch (error: any) {

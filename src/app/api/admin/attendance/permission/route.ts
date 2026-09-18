@@ -72,7 +72,6 @@ export async function POST(request: NextRequest) {
           name: name.trim(),
           class: className.trim(),
           exam_code: '', // Bisa diisi nanti saat ikut ujian
-          category: 'Gengo', // Default category
         }
       });
     }
