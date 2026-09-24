@@ -1,24 +1,7 @@
 import type { Metadata } from "next";
-import { Noto_Sans_JP, Noto_Serif_JP } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { FpjsProvider } from '@fingerprintjs/fingerprintjs-pro-react';
 import "./globals.css";
-
-const notoSansJP = Noto_Sans_JP({
-  variable: "--font-noto-sans-jp",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: 'swap',
-  preload: true,
-});
-
-const notoSerifJP = Noto_Serif_JP({
-  variable: "--font-noto-serif-jp",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: 'swap',
-  preload: false,
-});
 
 export const metadata: Metadata = {
   title: "学習管理システム - Japanese Learning Management System | Learn Japanese Online",
@@ -102,8 +85,6 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -112,7 +93,7 @@ export default function RootLayout({
         <meta name="color-scheme" content="light dark" />
       </head>
       <body
-        className={`${notoSansJP.variable} ${notoSerifJP.variable} antialiased transition-colors duration-300`}
+        className="antialiased transition-colors duration-300"
       >
         <FpjsProvider
           loadOptions={{

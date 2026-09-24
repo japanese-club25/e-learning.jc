@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+:root {
+  --font-noto-sans-jp: Arial, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --font-noto-serif-jp: Georgia, "Hiragino Mincho ProN", "Yu Mincho", serif;
+}
+
 @keyframes qr-scan-line {
   0%, 100% {
     top: 1rem;

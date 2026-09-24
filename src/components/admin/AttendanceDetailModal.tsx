@@ -17,6 +17,7 @@ import {
   ArrowUpDown
 } from 'lucide-react';
 import SyncButton from './SyncButton';
+import ManualAttendanceModal from './ManualAttendanceModal';
 
 interface Attendance {
   id: string;
@@ -55,6 +56,7 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'name' | 'time' | 'class'>('time');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [showManualModal, setShowManualModal] = useState(false);
 
   useEffect(() => {
     if (meetingId) {
@@ -334,6 +336,9 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
               >
                 <ArrowUpDown className={`w-5 h-5 text-slate-600 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`} />
               </button>
+              <button type="button" onClick={() => setShowManualModal(true)} className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-50">
+                <UserCheck className="h-4 w-4" /> Add Attendance
+              </button>
             </div>
 
             {/* Export Button */}
@@ -498,6 +503,14 @@ export default function AttendanceDetailModal({ meetingId, onClose }: Attendance
           </div>
         </div>
       </div>
+
+      {showManualModal && (
+        <ManualAttendanceModal
+          meetingId={meetingId}
+          onClose={() => setShowManualModal(false)}
+          onSuccess={() => { setShowManualModal(false); setLoading(true); fetchData(); }}
+        />
+      )}
     </div>
   );
 }

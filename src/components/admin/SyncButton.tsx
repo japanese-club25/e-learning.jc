@@ -30,12 +30,12 @@ const STATUS_CONFIG: Record<
   },
   SYNCING: {
     label: "Sedang sinkronisasi...",
-    color: "text-blue-600",
+    color: "text-orange-600",
     icon: <RefreshCw className="w-4 h-4 animate-spin" />,
   },
   SYNCED: {
     label: "Tersinkronkan",
-    color: "text-emerald-600",
+    color: "text-orange-600",
     icon: <CheckCircle2 className="w-4 h-4" />,
   },
   FAILED: {
@@ -135,7 +135,7 @@ export default function SyncButton({ meetingId, initialSyncInfo }: SyncButtonPro
 
       {/* Last result */}
       {lastResult?.rows !== undefined && (
-        <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 text-sm text-orange-800 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
           <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
           <span>
             Sync berhasil — <strong>{lastResult.rows}</strong> baris tersinkronkan
@@ -153,7 +153,7 @@ export default function SyncButton({ meetingId, initialSyncInfo }: SyncButtonPro
       <button
         onClick={handleSync}
         disabled={buttonDisabled}
-        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:from-green-700 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm transition-all duration-300 transform hover:scale-105 disabled:scale-100 whitespace-nowrap"
+        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-orange-600 text-white rounded-xl shadow-sm hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm transition-colors whitespace-nowrap"
       >
         {isSyncing ? (
           <>

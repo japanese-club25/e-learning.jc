@@ -17,6 +17,10 @@ export async function requireAdmin() {
   return requireRole("admin");
 }
 
+export async function requireAdminUser() {
+  return requireAdmin();
+}
+
 export async function requireStudentReady() {
   const result = await requireStudent();
   if (!result.user || result.response) return result;

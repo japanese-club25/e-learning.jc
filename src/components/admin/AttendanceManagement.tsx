@@ -35,6 +35,8 @@ export function AttendanceManagement() {
   const [selectedMeetingForDetail, setSelectedMeetingForDetail] = useState<string | null>(null);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [meetingCoords, setMeetingCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [enableGeofence, setEnableGeofence] = useState(false);
+  const [disablingGeofence, setDisablingGeofence] = useState<string | null>(null);
   const [meetingToDelete, setMeetingToDelete] = useState<Meeting | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -94,7 +96,7 @@ export function AttendanceManagement() {
 
       const payload: any = {
         title: title.trim(),
-        ...(meetingCoords ?? {}),
+        ...(enableGeofence && meetingCoords ? meetingCoords : {}),
       };
       if (startsAt) payload.starts_at = new Date(startsAt).toISOString();
       if (endsAt) payload.ends_at = new Date(endsAt).toISOString();
@@ -119,6 +121,7 @@ export function AttendanceManagement() {
         setStartsAt("");
         setEndsAt("");
         setMeetingCoords(null);
+        setEnableGeofence(false);
         setSuccess("Meeting berhasil dibuat!");
         setTimeout(() => setSuccess(null), 3000);
         await fetchMeetings();
@@ -131,6 +134,24 @@ export function AttendanceManagement() {
       setTimeout(() => setError(null), 3000);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function disableGeofence(meeting: Meeting) {
+    if (!window.confirm(`Disable geofencing for "${meeting.title}"? Students will be able to attend from anywhere. This cannot be undone.`)) return;
+    setDisablingGeofence(meeting.id);
+    setError(null);
+    try {
+      const response = await fetch(`/api/admin/meeting/${meeting.id}/disable-geofence`, { method: "PATCH" });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || "Failed to disable geofence");
+      setSuccess("Geofence disabled permanently.");
+      setTimeout(() => setSuccess(null), 3000);
+      await fetchMeetings();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to disable geofence");
+    } finally {
+      setDisablingGeofence(null);
     }
   }
 
@@ -346,19 +367,14 @@ export function AttendanceManagement() {
         {/* Left / Main */}
         <div className="lg:col-span-2 space-y-6">
           {/* Create Meeting Form */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-orange-100">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-orange-50 p-3 rounded-xl">
-                <QrCode className="w-6 h-6 text-orange-600" />
-              </div>
+          <div className="bg-white rounded-2xl shadow-sm p-6 border border-orange-100">
+            <div className="flex items-start justify-between gap-4 mb-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  Create New Meeting
-                </h3>
-                <p className="text-sm text-slate-500">
-                  Set jadwal dan generate QR absensi
-                </p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">New session</p>
+                <h3 className="text-xl font-bold text-slate-900 mt-1">Create Meeting</h3>
+                <p className="text-sm text-slate-500 mt-1">Set the schedule, location, and attendance QR.</p>
               </div>
+              <div className="hidden sm:flex bg-orange-50 p-3 rounded-xl border border-orange-100"><QrCode className="w-6 h-6 text-orange-600" /></div>
             </div>
 
             <form onSubmit={createMeeting} className="space-y-4">
@@ -373,7 +389,7 @@ export function AttendanceManagement() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Example: Week 1 meeting..."
-                  className="text-black mt-2 block w-full rounded-xl border-2 border-slate-200 bg-slate-50 p-3.5 text-sm focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition-all outline-none hover:border-slate-300"
+                   className="text-black mt-2 block w-full rounded-xl border border-orange-200 bg-white p-3.5 text-sm focus:ring-2 focus:ring-orange-200 focus:border-orange-400 transition-colors outline-none hover:border-orange-300"
                 />
               </label>
 
@@ -409,7 +425,7 @@ export function AttendanceManagement() {
                 </label>
               </div>
 
-              <div className="flex items-center gap-3">
+               <div className="flex flex-col-reverse sm:flex-row items-stretch gap-3 pt-2">
                 <button
                   type="submit"
                   className="flex-1 inline-flex items-center justify-center gap-2 bg-orange-600 text-white px-6 py-3.5 rounded-xl hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed font-semibold text-sm transition-colors"
@@ -435,6 +451,7 @@ export function AttendanceManagement() {
                     setEndsAt("");
                     setError(null);
                     setMeetingCoords(null);
+                    setEnableGeofence(false);
                   }}
                   className="px-6 py-3.5 rounded-xl border-2 border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
                 >
@@ -442,31 +459,31 @@ export function AttendanceManagement() {
                 </button>
               </div>
 
-              {/* Lokasi absensi (geofence 150 m) */}
-              <div className="rounded-xl border-2 border-slate-200 bg-slate-50 p-4 hover:border-slate-300 transition-colors">
-                <LocationPicker
-                  value={meetingCoords}
-                  onChange={setMeetingCoords}
-                />
-              </div>
+               <label className="flex items-center justify-between rounded-xl border border-orange-200 bg-orange-50 p-4 cursor-pointer hover:border-orange-300 transition-colors">
+                <span>
+                  <span className="block text-sm font-semibold text-slate-800">Enable geofencing</span>
+                  <span className="block text-xs text-slate-500 mt-1">Require students to be within the meeting location.</span>
+                </span>
+                <input type="checkbox" checked={enableGeofence} onChange={(event) => { setEnableGeofence(event.target.checked); if (!event.target.checked) setMeetingCoords(null); }} className="h-5 w-5 rounded border-orange-300 text-orange-600 focus:ring-orange-500" />
+              </label>
+
+              {enableGeofence && (
+                <div className="rounded-xl border-2 border-orange-200 bg-orange-50 p-4">
+                  <LocationPicker value={meetingCoords} onChange={setMeetingCoords} />
+                </div>
+              )}
             </form>
           </div>
 
           {/* Meetings List */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-orange-100">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-orange-500 p-3 rounded-xl shadow-sm">
-                <Calendar className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  Recent Meetings
-                </h3>
-                <p className="text-sm text-slate-500">
-                  Recent Meetings • {filteredMeetings.length} results
-                </p>
-              </div>
-            </div>
+           <div className="bg-white rounded-2xl shadow-sm p-6 border border-orange-100">
+             <div className="flex items-center justify-between gap-4 mb-6">
+               <div className="flex items-center gap-3">
+                 <div className="bg-orange-500 p-3 rounded-xl shadow-sm"><Calendar className="w-6 h-6 text-white" /></div>
+                 <div><h3 className="text-lg font-bold text-slate-900">Recent Meetings</h3><p className="text-sm text-slate-500">Manage schedules, QR codes, and attendance.</p></div>
+               </div>
+               <span className="shrink-0 rounded-full bg-orange-50 px-3 py-1.5 text-xs font-bold text-orange-700 border border-orange-100">{filteredMeetings.length} results</span>
+             </div>
 
             {loading && meetings.length === 0 ? (
               <div className="py-16 text-center">
@@ -475,19 +492,14 @@ export function AttendanceManagement() {
               </div>
             ) : meetings.length === 0 ? (
               <div className="py-12 text-center">
-                <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-12 border-2 border-dashed border-slate-300">
+                 <div className="rounded-2xl p-12 border-2 border-dashed border-orange-200 bg-orange-50/40">
                   <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Calendar className="w-10 h-10 text-orange-600" />
                   </div>
                   <h4 className="text-lg font-bold text-slate-900 mb-2">
                     No Meetings Yet
                   </h4>
-                  <p className="text-sm text-slate-500 mb-1">
-                    No meetings yet
-                  </p>
-                  <p className="text-sm text-slate-600">
-                    Create your first meeting to get started!
-                  </p>
+                   <p className="text-sm text-slate-600">Create your first meeting to get started.</p>
                 </div>
               </div>
             ) : (
@@ -495,7 +507,7 @@ export function AttendanceManagement() {
                 {filteredMeetings.map((m, index) => (
                   <li
                     key={m.id}
-                    className="group p-5 bg-white rounded-xl border border-orange-100 hover:border-orange-300 shadow-sm hover:shadow-md transition-all duration-300 animate-in slide-in-from-bottom"
+                     className="group p-5 bg-white rounded-xl border border-slate-200 hover:border-orange-300 shadow-sm hover:shadow-md transition-all duration-300 animate-in slide-in-from-bottom"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -505,38 +517,37 @@ export function AttendanceManagement() {
                             <QrCode className="w-5 h-5 text-white" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-slate-900 text-base truncate group-hover:text-indigo-700 transition-colors">
+                             <p className="font-bold text-slate-900 text-base truncate group-hover:text-orange-700 transition-colors">
                               {m.title}
                             </p>
-                            <div className="flex items-center gap-2 mt-1">
+                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
                               <Clock className="w-3.5 h-3.5 text-slate-400" />
                               <p className="text-xs text-slate-500 font-medium">
-                                Created:{" "}
-                                {new Date(m.created_at).toLocaleString("ja-JP")}
+                                 Created {new Date(m.created_at).toLocaleDateString("en-US")}
                               </p>
                             </div>
                             {m.starts_at && (
                               <div className="flex items-center gap-2 mt-1">
                                 <Calendar className="w-3.5 h-3.5 text-slate-400" />
                                 <p className="text-xs text-slate-500 font-medium">
-                                  Start:{" "}
-                                  {new Date(m.starts_at).toLocaleString(
-                                    "ja-JP",
-                                  )}
-                                  {m.ends_at &&
-                                    ` - End: ${new Date(m.ends_at).toLocaleString("ja-JP")}`}
+                                   {new Date(m.starts_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+                                   {m.ends_at && ` - ${new Date(m.ends_at).toLocaleString("en-US", { timeStyle: "short" })}`}
                                 </p>
                               </div>
                             )}
                             <div className="mt-1">
                               {m.latitude != null && m.longitude != null ? (
-                                <span className="text-xs text-emerald-700 font-medium">
-                                  📍 Geofence aktif ({m.latitude.toFixed(6)},{" "}
-                                  {m.longitude.toFixed(6)})
-                                </span>
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-xs text-emerald-700 font-medium">
+                                    Geofence active ({m.latitude.toFixed(6)}, {m.longitude.toFixed(6)})
+                                  </span>
+                                  <button type="button" onClick={() => disableGeofence(m)} disabled={disablingGeofence === m.id} className="text-xs font-semibold text-red-600 hover:text-red-700 underline disabled:opacity-50">
+                                    {disablingGeofence === m.id ? "Disabling..." : "Disable permanently"}
+                                  </button>
+                                </div>
                               ) : (
                                 <span className="text-xs text-slate-500">
-                                  📍 Tanpa lokasi — geofence tidak aktif
+                                  Geofence disabled — location is not required
                                 </span>
                               )}
                             </div>
