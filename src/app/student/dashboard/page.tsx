@@ -89,13 +89,13 @@ export default function StudentDashboard() {
   if (user.isFirstLogin) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-xl">
+        <div className="bg-white rounded-2xl p-5 sm:p-8 max-w-md w-full max-h-[calc(100dvh-2rem)] overflow-y-auto shadow-xl">
           <div className="flex justify-center mb-4">
             <div className="bg-orange-50 p-3 rounded-full">
               <Lock className="w-8 h-8 text-orange-500" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-center text-slate-900 mb-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-center text-slate-900 mb-2">
             Change Password
           </h2>
           <p className="text-center text-slate-500 mb-6 text-sm">
@@ -148,14 +148,14 @@ export default function StudentDashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50">
-        <header className="bg-white border-b border-orange-100 px-6 py-4 flex justify-between items-center shadow-sm">
-          <div className="flex items-center gap-3">
+      <div className="min-h-screen overflow-x-hidden bg-slate-50">
+        <header className="bg-white border-b border-orange-100 px-3 sm:px-6 py-3 sm:py-4 flex justify-between items-center gap-2 shadow-sm">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <div className="bg-orange-50 p-2 rounded-lg border border-orange-100">
               <FileText className="w-5 h-5 text-orange-600" />
             </div>
-            <h1 className="text-xl font-bold text-slate-900">
-              Student Dashboard
+            <h1 className="truncate text-base sm:text-xl font-bold text-slate-900">
+              <span className="hidden min-[400px]:inline">Student </span>Dashboard
             </h1>
           </div>
           <button
@@ -167,16 +167,16 @@ export default function StudentDashboard() {
           </button>
         </header>
 
-        <main className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-6 sm:p-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-3">
+        <main className="px-3 py-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
+          <div className="min-w-0 bg-white rounded-2xl shadow-sm border border-orange-100 p-4 sm:p-8">
+            <h2 className="break-words text-xl sm:text-2xl font-bold leading-tight text-slate-900 mb-3">
               Welcome back, {user.name || user.email}!
             </h2>
             {(user.class || user.category) && (
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex max-w-full flex-wrap gap-2 mb-4">
                 {user.class && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200">
-                    Class {user.class}
+                    <span className="break-words">Class {user.class}</span>
                   </span>
                 )}
                 {user.category && (
@@ -186,8 +186,8 @@ export default function StudentDashboard() {
                 )}
               </div>
             )}
-            <p className="text-slate-500 text-sm">
-              Select an action below to continue your learning journey.
+              <p className="text-slate-500 text-sm break-words">
+              Choose an exam or scan attendance to continue.
             </p>
           </div>
 
@@ -199,11 +199,11 @@ export default function StudentDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Exam Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-6 flex flex-col h-full hover:shadow-md transition-shadow">
+            <div className="min-w-0 bg-white rounded-2xl shadow-sm border border-orange-100 p-4 sm:p-6 flex flex-col h-full hover:shadow-md transition-shadow">
               <div className="bg-orange-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4 border border-orange-100">
                 <FileText className="w-6 h-6 text-orange-600" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
                 Take an Exam
               </h3>
               <p className="text-slate-500 mb-6 flex-grow text-sm">
@@ -211,19 +211,19 @@ export default function StudentDashboard() {
                 examination.
               </p>
 
-              <form onSubmit={handleStartExam} className="flex gap-2">
+              <form onSubmit={handleStartExam} className="flex min-w-0 flex-col gap-2 min-[400px]:flex-row">
                 <input
                   type="text"
                   value={examCode}
                   onChange={(e) => setExamCode(e.target.value)}
                   placeholder="Enter Exam Code"
-                  className="flex-grow px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-slate-900"
+                  className="min-w-0 w-full flex-grow px-3 sm:px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-slate-900"
                   required
                 />
                 <button
                   type="submit"
                   disabled={startExamLoading}
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-xl font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                  className="w-full min-[400px]:w-auto bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {startExamLoading ? (
                     "Starting..."
@@ -237,11 +237,11 @@ export default function StudentDashboard() {
             </div>
 
             {/* Attendance Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-orange-100 p-6 flex flex-col h-full hover:shadow-md transition-shadow">
+            <div className="min-w-0 bg-white rounded-2xl shadow-sm border border-orange-100 p-4 sm:p-6 flex flex-col h-full hover:shadow-md transition-shadow">
               <div className="bg-orange-50 w-12 h-12 rounded-xl flex items-center justify-center mb-4 border border-orange-100">
                 <QrCode className="w-6 h-6 text-orange-600" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
                 Scan Attendance
               </h3>
               <p className="text-slate-500 mb-6 flex-grow text-sm">
@@ -256,4 +256,3 @@ export default function StudentDashboard() {
     </ProtectedRoute>
   );
 }
-

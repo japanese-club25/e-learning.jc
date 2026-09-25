@@ -5,6 +5,12 @@
   --font-noto-serif-jp: Georgia, "Hiragino Mincho ProN", "Yu Mincho", serif;
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 @keyframes qr-scan-line {
   0%, 100% {
     top: 1rem;
