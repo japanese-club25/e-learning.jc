@@ -558,6 +558,10 @@ export function StudentManagement() {
           student={selectedStudent}
           isOpen={showStudentDetail}
           onClose={() => setShowStudentDetail(false)}
+          onUpdated={(updatedStudent) => {
+            setSelectedStudent(updatedStudent);
+            setStudents((current) => current.map((item) => item.id === updatedStudent.id ? updatedStudent : item));
+          }}
         />
       )}
     </div>
