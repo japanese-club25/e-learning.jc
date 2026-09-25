@@ -215,6 +215,8 @@ model Meeting {
   last_synced_at    DateTime? // Timestamp of last successful sync
   sync_status       SyncStatus        @default(PENDING)
   sync_error        String? // Last error message if sync failed
+  attendance_code_hash String? @unique
+  attendance_code_created_at DateTime?
   attendances       Attendance[]
   qr_tokens         MeetingQrToken[]
 
