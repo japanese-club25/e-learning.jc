@@ -18,6 +18,8 @@ export default function AttendanceQrScanner() {
   const [busy, setBusy] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
 
+  const createReader = () => new BrowserQRCodeReader(250);
+
   useEffect(() => () => {
     readerRef.current?.reset();
     stopStream();
@@ -26,9 +28,9 @@ export default function AttendanceQrScanner() {
 
   useEffect(() => {
     if (state !== "camera" || !cameraReady || !videoRef.current) return;
-    const reader = new BrowserQRCodeReader();
+    const reader = createReader();
     readerRef.current = reader;
-    reader.decodeFromVideoElementContinuously(videoRef.current, (result) => {
+    reader.decodeFromVideoElementContinuously(videoRef.current, (result, error) => {
       if (!result || detectionLockedRef.current) return;
       detectionLockedRef.current = true;
       reader.reset();
@@ -114,7 +116,7 @@ export default function AttendanceQrScanner() {
     setState("decoding");
     setMessage("Detecting QR code from captured image...");
     try {
-      const reader = new BrowserQRCodeReader();
+      const reader = createReader();
       const result = await reader.decodeFromImageUrl(capturedImage);
       const token = result.getText();
       if (!token) throw new Error("No QR token found");
@@ -169,6 +171,7 @@ export default function AttendanceQrScanner() {
       setState("camera");
       document.body.style.overflow = "hidden";
 
+      if (!navigator.mediaDevices?.getUserMedia) throw new Error("Camera API unavailable");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
         audio: false,
@@ -177,7 +180,7 @@ export default function AttendanceQrScanner() {
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(() => undefined);
+        await videoRef.current.play();
       }
     } catch {
       setState("error");
