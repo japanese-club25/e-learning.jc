@@ -3,6 +3,7 @@ import prisma from "@/config/prisma";
 import { isValidCoordinate } from "@/utils/geofence";
 import { requireAdmin } from "@/lib/auth-guard";
 import { generateAttendanceQrToken, hashAttendanceQrToken } from "@/lib/attendance-qr";
+import { generateAttendanceCode, hashAttendanceCode } from "@/lib/attendance-code";
 
 // POST: create a new meeting (generates a unique meeting id and returns a qr payload)
 export async function POST(request: NextRequest) {
@@ -31,15 +32,21 @@ export async function POST(request: NextRequest) {
     });
 
     const qrToken = generateAttendanceQrToken();
+    const attendanceCode = generateAttendanceCode();
     const expiresAt = meeting.ends_at ?? null;
     await prisma.meetingQrToken.create({
       data: { meeting_id: meeting.id, token_hash: hashAttendanceQrToken(qrToken), expires_at: expiresAt },
+    });
+    await prisma.meeting.update({
+      where: { id: meeting.id },
+      data: { attendance_code_hash: hashAttendanceCode(attendanceCode), attendance_code_created_at: new Date() },
     });
     
     return NextResponse.json({ 
       success: true, 
       meeting, 
-      qr_payload: qrToken
+      qr_payload: qrToken,
+      attendance_code: attendanceCode,
     });
   } catch (error) {
     console.error("Create meeting error:", error);

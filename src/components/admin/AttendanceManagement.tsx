@@ -35,6 +35,7 @@ export function AttendanceManagement() {
   const [selectedMeetingForDetail, setSelectedMeetingForDetail] = useState<string | null>(null);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [meetingCoords, setMeetingCoords] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [attendanceCode, setAttendanceCode] = useState<string | null>(null);
   const [enableGeofence, setEnableGeofence] = useState(false);
   const [disablingGeofence, setDisablingGeofence] = useState<string | null>(null);
   const [meetingToDelete, setMeetingToDelete] = useState<Meeting | null>(null);
@@ -109,6 +110,7 @@ export function AttendanceManagement() {
       const data = await res.json();
       if (data.success) {
         setQrPayload(null);
+        setAttendanceCode(data.attendance_code || null);
         setQrCodeImage(null);
 
         // Generate QR code immediately after creating meeting
@@ -522,7 +524,7 @@ export function AttendanceManagement() {
                             </p>
                              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
                               <Clock className="w-3.5 h-3.5 text-slate-400" />
-                              <p className="text-xs text-slate-500 font-medium">
+          <p className="text-xs text-slate-500 font-medium">
                                  Created {new Date(m.created_at).toLocaleDateString("en-US")}
                               </p>
                             </div>
@@ -753,13 +755,14 @@ export function AttendanceManagement() {
                     </pre>
                   </div>
 
-                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                   <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
                     <p className="text-xs text-orange-700 font-medium flex items-center gap-2">
                       <AlertCircle className="w-4 h-4" />
                       Students can scan this QR code to access the attendance
                       form directly
                     </p>
-                  </div>
+                   </div>
+                   {attendanceCode && <div className="rounded-xl border-2 border-orange-200 bg-orange-50 p-4 text-center"><p className="text-xs font-bold uppercase tracking-wider text-orange-700">Attendance Code</p><p className="mt-1 font-mono text-3xl font-black tracking-[0.35em] text-orange-900">{attendanceCode}</p><p className="mt-1 text-xs text-orange-700">Students can enter this code if scanning fails.</p></div>}
                 </div>
               ) : (
                 <div className="text-center py-8">

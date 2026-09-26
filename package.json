@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:admin": "tsx --env-file=.env prisma/seed.admin.ts",
+    "db:seed:students": "tsx --env-file=.env prisma/seed.siswa.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

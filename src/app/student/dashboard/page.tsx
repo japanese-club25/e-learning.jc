@@ -15,6 +15,8 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(false);
   const [examCode, setExamCode] = useState("");
   const [startExamLoading, setStartExamLoading] = useState(false);
+  const [attendanceCode, setAttendanceCode] = useState("");
+  const [attendanceCodeLoading, setAttendanceCodeLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -82,6 +84,22 @@ export default function StudentDashboard() {
     } finally {
       setStartExamLoading(false);
     }
+  };
+
+  const handleAttendanceCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^\d{6}$/.test(attendanceCode)) return setError("Enter a valid 6-digit attendance code");
+    setAttendanceCodeLoading(true); setError("");
+    try {
+      let deviceId = localStorage.getItem("attendance_device_id");
+      if (!deviceId) { deviceId = crypto.randomUUID(); localStorage.setItem("attendance_device_id", deviceId); }
+      const response = await fetch("/api/student/attendance/code", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ attendance_code: attendanceCode, device_id: deviceId }) });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.message || "Attendance code failed");
+      setAttendanceCode("");
+      setError(`Attendance recorded: ${data.meeting?.title || "Meeting"}`);
+    } catch (err) { setError(err instanceof Error ? err.message : "Failed to record attendance"); }
+    finally { setAttendanceCodeLoading(false); }
   };
 
   if (!user) return null;
@@ -249,6 +267,13 @@ export default function StudentDashboard() {
               </p>
 
               <AttendanceQrScanner />
+              <div className="mt-5 border-t border-orange-100 pt-5">
+                <p className="mb-2 text-sm font-semibold text-slate-800">Or enter attendance code</p>
+                <form onSubmit={handleAttendanceCode} className="flex gap-2">
+                  <input inputMode="numeric" maxLength={6} pattern="[0-9]{6}" value={attendanceCode} onChange={(e) => setAttendanceCode(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="6-digit code" className="min-w-0 flex-1 rounded-xl border border-orange-200 px-3 py-2 text-center font-mono tracking-widest text-slate-900 outline-none focus:border-orange-500" />
+                  <button disabled={attendanceCodeLoading || attendanceCode.length !== 6} className="rounded-xl bg-orange-600 px-4 py-2 font-semibold text-white hover:bg-orange-700 disabled:opacity-50">{attendanceCodeLoading ? "..." : "Submit"}</button>
+                </form>
+              </div>
             </div>
           </div>
         </main>
