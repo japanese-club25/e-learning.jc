@@ -10,6 +10,8 @@ export default function AttendanceQrScanner() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const readerRef = useRef<BrowserQRCodeReader | null>(null);
+  const detectionLockedRef = useRef(false);
   const [state, setState] = useState<ScanState>("idle");
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -17,9 +19,23 @@ export default function AttendanceQrScanner() {
   const [cameraReady, setCameraReady] = useState(false);
 
   useEffect(() => () => {
+    readerRef.current?.reset();
     stopStream();
     document.body.style.overflow = "";
   }, []);
+
+  useEffect(() => {
+    if (state !== "camera" || !cameraReady || !videoRef.current) return;
+    const reader = new BrowserQRCodeReader();
+    readerRef.current = reader;
+    reader.decodeFromVideoElementContinuously(videoRef.current, (result) => {
+      if (!result || detectionLockedRef.current) return;
+      detectionLockedRef.current = true;
+      reader.reset();
+      void submitToken(result.getText());
+    });
+    return () => reader.reset();
+  }, [state, cameraReady]);
 
   const stopStream = () => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -38,6 +54,8 @@ export default function AttendanceQrScanner() {
   };
 
   const closeScanner = () => {
+    readerRef.current?.reset();
+    detectionLockedRef.current = false;
     stopStream();
     setState("idle");
     setCapturedImage(null);
@@ -127,6 +145,8 @@ export default function AttendanceQrScanner() {
     canvas.getContext("2d")?.drawImage(video, 0, 0, width, height);
     const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
     setCapturedImage(dataUrl);
+    readerRef.current?.reset();
+    detectionLockedRef.current = true;
     stopStream();
     setState("captured");
     setMessage("Image captured. Tap Detect QR to analyse it.");
@@ -136,6 +156,7 @@ export default function AttendanceQrScanner() {
     setCapturedImage(null);
     setMessage(null);
     setBusy(false);
+    detectionLockedRef.current = false;
     await start();
   };
 
@@ -144,6 +165,7 @@ export default function AttendanceQrScanner() {
       setMessage(null);
       setCapturedImage(null);
       setCameraReady(false);
+      detectionLockedRef.current = false;
       setState("camera");
       document.body.style.overflow = "hidden";
 
