@@ -10,6 +10,7 @@ export interface AuthUser {
   name?: string;
   class?: string;
   category?: "Gengo" | "Bunka";
+  avatarUrl?: string | null;
 }
 
 interface AuthContextType {

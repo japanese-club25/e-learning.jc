@@ -231,7 +231,6 @@ export function StudentManagement() {
         email: "student@example.com",
         class: "Class A",
         password: "",
-        exam_code: "",
       },
     ]);
     const workbook = XLSX.utils.book_new();
@@ -367,7 +366,7 @@ export function StudentManagement() {
             + Add Student
           </button>
           <a
-            href={`data:text/csv;charset=utf-8,${encodeURIComponent("name,email,class,category,password,exam_code\nExample Student,student@example.com,Class A,Gengo,,")}`}
+            href={`data:text/csv;charset=utf-8,${encodeURIComponent("name,email,class,password\nExample Student,student@example.com,Class A,")}`}
             download="students-template.csv"
             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
           >

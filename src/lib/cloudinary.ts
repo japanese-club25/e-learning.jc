@@ -6,9 +6,11 @@
 import { v2 as cloudinary } from "cloudinary";
 
 export const QUESTION_IMAGE_FOLDER = "exam-questions";
+export const STUDENT_AVATAR_FOLDER = "student-avatars";
 // 4MB, not 5: serverless hosts (Vercel) reject request bodies above ~4.5MB
 // before the handler ever runs, which would surface as an opaque 413.
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+export const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 export const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
   "image/png",
@@ -79,6 +81,26 @@ export async function uploadQuestionImage(file: File): Promise<UploadedImage> {
   );
 
   return { url: result.secure_url, publicId: result.public_id };
+}
+
+export async function uploadStudentAvatar(file: File): Promise<UploadedImage> {
+  const client = getClient();
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const result = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
+    const stream = client.uploader.upload_stream({ folder: STUDENT_AVATAR_FOLDER, resource_type: "image" }, (error, uploaded) => {
+      if (error || !uploaded) return reject(error ?? new Error("Cloudinary upload returned no result"));
+      resolve({ secure_url: uploaded.secure_url, public_id: uploaded.public_id });
+    });
+    stream.end(buffer);
+  });
+  return { url: result.secure_url, publicId: result.public_id };
+}
+
+export function validateAvatarFile(file: File): string | null {
+  if (!file.size) return "Image file is empty";
+  if (file.size > MAX_AVATAR_BYTES) return "Image must not exceed 2MB";
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type as (typeof ALLOWED_IMAGE_TYPES)[number])) return "Image must be JPEG, PNG or WebP";
+  return null;
 }
 
 /**

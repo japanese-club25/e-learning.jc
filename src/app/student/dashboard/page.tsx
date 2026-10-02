@@ -3,9 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
-import { Lock, LogOut, FileText, QrCode, Play } from "lucide-react";
+import { Lock, FileText, QrCode, Play } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AttendanceQrScanner from "@/components/attendance/AttendanceQrScanner";
+import StudentProfileMenu from "@/components/student/StudentProfileMenu";
 
 export default function StudentDashboard() {
   const { user, logout, refreshUser, changePassword } = useAuth();
@@ -17,10 +18,17 @@ export default function StudentDashboard() {
   const [startExamLoading, setStartExamLoading] = useState(false);
   const [attendanceCode, setAttendanceCode] = useState("");
   const [attendanceCodeLoading, setAttendanceCodeLoading] = useState(false);
+  const [overview, setOverview] = useState<any>(null);
+  const [overviewLoading, setOverviewLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     refreshUser();
+    fetch("/api/student/overview")
+      .then((response) => response.json())
+      .then((data) => { if (data.success) setOverview(data); })
+      .catch(() => undefined)
+      .finally(() => setOverviewLoading(false));
   }, []);
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -126,6 +134,15 @@ export default function StudentDashboard() {
             </div>
           )}
 
+          <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              ["Active Exams", overview?.summary?.active_exams ?? 0],
+              ["Completed", overview?.summary?.completed_exams ?? 0],
+              ["In Progress", overview?.summary?.in_progress_exams ?? 0],
+              ["Average Score", `${overview?.summary?.average_score ?? 0}%`],
+            ].map(([label, value]) => <div key={String(label)} className="rounded-xl border border-orange-100 bg-white p-4 shadow-sm"><p className="text-xs font-medium text-slate-500">{label}</p><p className="mt-1 text-xl font-bold text-orange-700">{overviewLoading ? "—" : value}</p></div>)}
+          </section>
+
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -176,13 +193,7 @@ export default function StudentDashboard() {
               <span className="hidden min-[400px]:inline">Student </span>Dashboard
             </h1>
           </div>
-          <button
-            onClick={() => logout()}
-            className="flex items-center gap-2 text-slate-500 hover:text-orange-600 hover:bg-orange-50 px-3 py-2 rounded-lg transition-colors"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium hidden sm:block">Logout</span>
-          </button>
+          <StudentProfileMenu user={user} logout={logout} />
         </header>
 
         <main className="px-3 py-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-6">
@@ -190,16 +201,11 @@ export default function StudentDashboard() {
             <h2 className="break-words text-xl sm:text-2xl font-bold leading-tight text-slate-900 mb-3">
               Welcome back, {user.name || user.email}!
             </h2>
-            {(user.class || user.category) && (
+            {user.class && (
               <div className="flex max-w-full flex-wrap gap-2 mb-4">
                 {user.class && (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200">
                     <span className="break-words">Class {user.class}</span>
-                  </span>
-                )}
-                {user.category && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200">
-                    {user.category}
                   </span>
                 )}
               </div>
@@ -276,6 +282,18 @@ export default function StudentDashboard() {
               </div>
             </div>
           </div>
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <section className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center justify-between"><div><h3 className="font-bold text-slate-900">Exam History</h3><p className="text-sm text-slate-500">Your recent attempts and scores</p></div></div>
+              <div className="space-y-3">{overview?.exam_history?.length ? overview.exam_history.slice(0, 6).map((item: any) => <div key={item.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 p-3"><div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900">{item.exam.name || item.exam.exam_code}</p><p className="text-xs text-slate-500">{item.status} · {item.finished_at ? new Date(item.finished_at).toLocaleDateString() : "Not submitted"}</p></div><div className="text-right"><p className="font-bold text-orange-700">{item.score ?? 0}</p>{item.can_review && <a href={`/exam/${item.exam.category.toLowerCase()}/test?review=${item.exam.exam_code}`} className="text-xs font-semibold text-orange-600 hover:underline">Review</a>}</div></div>) : <p className="py-6 text-center text-sm text-slate-500">No exam history yet.</p>}</div>
+            </section>
+            <section className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
+              <div className="mb-4"><h3 className="font-bold text-slate-900">Upcoming Meetings</h3><p className="text-sm text-slate-500">Scheduled attendance sessions</p></div>
+              <div className="space-y-3">{overview?.upcoming_meetings?.length ? overview.upcoming_meetings.map((meeting: any) => <div key={meeting.id} className="rounded-xl border border-orange-100 bg-orange-50/50 p-3"><p className="font-semibold text-slate-900">{meeting.title || "Meeting"}</p><p className="mt-1 text-xs text-slate-600">{meeting.starts_at ? new Date(meeting.starts_at).toLocaleString() : "Schedule pending"}</p></div>) : <p className="py-6 text-center text-sm text-slate-500">No upcoming meetings.</p>}</div>
+            </section>
+          </div>
+          <section className="rounded-2xl border border-orange-100 bg-white p-5 shadow-sm"><div className="mb-4"><h3 className="font-bold text-slate-900">Attendance Status</h3><p className="text-sm text-slate-500">Your latest attendance records</p></div><div className="grid gap-2 sm:grid-cols-2">{overview?.attendance?.length ? overview.attendance.slice(0, 6).map((item: any) => <div key={item.id} className="flex items-center justify-between rounded-lg border border-slate-100 p-3"><div><p className="text-sm font-semibold text-slate-900">{item.meeting?.title || "Meeting"}</p><p className="text-xs text-slate-500">{new Date(item.recorded_at).toLocaleDateString()}</p></div><span className="rounded-full bg-orange-50 px-2 py-1 text-xs font-bold text-orange-700">{item.status}</span></div>) : <p className="py-6 text-center text-sm text-slate-500">No attendance records yet.</p>}</div></section>
         </main>
       </div>
     </ProtectedRoute>

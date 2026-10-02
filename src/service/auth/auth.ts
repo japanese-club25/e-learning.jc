@@ -101,6 +101,7 @@ export class AuthService {
         name: validatedToken.name,
         class: validatedToken.class,
         category: validatedToken.category,
+        avatarUrl: validatedToken.avatarUrl,
       };
     } catch (error) {
       console.error("Get current user error:", error);
@@ -178,6 +179,7 @@ export class AuthService {
         name: validatedToken.name,
         class: validatedToken.class,
         category: validatedToken.category,
+        avatarUrl: validatedToken.avatarUrl,
       };
     } catch (error) {
       console.error("Token validation error:", error);

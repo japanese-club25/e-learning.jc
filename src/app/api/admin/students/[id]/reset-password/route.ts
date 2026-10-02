@@ -15,7 +15,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
     const password_hash = await bcrypt.hash(password, 10);
     await prisma.student.update({ where: { id }, data: { password_hash, is_first_login: true } });
-    await TokenService.revokeAllUserTokens(id);
+    const revoked = await TokenService.revokeAllUserTokens(id);
+    if (!revoked) {
+      return NextResponse.json({ success: false, message: "Password changed, but active sessions could not be revoked" }, { status: 500 });
+    }
     return NextResponse.json({ success: true, message: "Password reset successfully. Student must change it on next login." });
   } catch (error: any) {
     if (error?.code === "P2025") return NextResponse.json({ success: false, message: "Student not found" }, { status: 404 });

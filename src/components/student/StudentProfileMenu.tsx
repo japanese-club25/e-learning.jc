@@ -1,0 +1,8 @@
+"use client";
+import Link from "next/link";
+import { UserCircle, LogOut } from "lucide-react";
+import { AuthUser } from "@/context/AuthContext";
+
+export default function StudentProfileMenu({ user, logout }: { user: AuthUser; logout: () => Promise<void> }) {
+  return <details className="relative shrink-0"><summary className="flex cursor-pointer list-none items-center gap-2 rounded-xl p-1.5 hover:bg-orange-50"><span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-orange-100 text-sm font-bold text-orange-700">{user.avatarUrl ? <img src={user.avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : (user.name || user.email).slice(0, 2).toUpperCase()}</span><span className="hidden max-w-32 truncate text-sm font-semibold text-slate-700 sm:block">{user.name || user.email}</span></summary><div className="absolute right-0 z-30 mt-2 w-64 max-w-[calc(100vw-1.5rem)] rounded-xl border border-orange-100 bg-white p-3 shadow-xl"><div className="mb-2 border-b border-orange-100 px-2 pb-3"><p className="truncate text-sm font-semibold text-slate-900">{user.name || user.email}</p><p className="truncate text-xs text-slate-500">{user.email}</p></div><Link href="/student/profile" className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-slate-700 hover:bg-orange-50 hover:text-orange-700"><UserCircle className="h-4 w-4" /> Profile</Link><button onClick={() => void logout()} className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-slate-700 hover:bg-orange-50 hover:text-orange-700"><LogOut className="h-4 w-4" /> Logout</button></div></details>;
+}

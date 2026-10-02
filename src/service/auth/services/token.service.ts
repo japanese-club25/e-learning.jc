@@ -30,6 +30,7 @@ export interface ValidatedToken {
   name?: string;
   class?: string;
   category?: "Gengo" | "Bunka";
+  avatarUrl?: string | null;
 }
 
 export class TokenService {
@@ -111,6 +112,7 @@ export class TokenService {
                 is_first_login: true,
                 name: true,
                 class: true,
+                avatar_url: true,
              }
           }
         },
@@ -155,8 +157,9 @@ export class TokenService {
             email: authToken.student.email ?? "",
             role: "student",
             isFirstLogin: authToken.student.is_first_login,
-            name: authToken.student.name,
-            class: authToken.student.class,
+             name: authToken.student.name,
+             class: authToken.student.class,
+             avatarUrl: authToken.student.avatar_url,
          };
       }
 
